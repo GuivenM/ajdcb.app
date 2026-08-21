@@ -79,7 +79,7 @@ export function Home() {
               transition={{ delay: 0.2, duration: 0.8 }}
               className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-[0.9] tracking-tight"
             >
-              L'Elite Congolaise <br/>
+              La Diaspora Congolaise <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-200 to-white">
                 au cœur du Bénin.
               </span>
@@ -104,7 +104,7 @@ export function Home() {
               <Link to="/join" className="group relative px-8 py-4 bg-emerald-600 text-white font-bold text-lg rounded-full overflow-hidden shadow-2xl transition-all hover:scale-105 active:scale-95">
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                 <span className="relative flex items-center gap-2">
-                  Rejoindre l'AJECB <ArrowRight size={20} />
+                  Rejoindre l'AJDCB <ArrowRight size={20} />
                 </span>
               </Link>
               <Link to="/about" className="flex items-center gap-4 px-8 py-4 text-white font-medium hover:text-emerald-300 transition-colors group">
@@ -152,7 +152,7 @@ export function Home() {
                <div className="absolute -inset-4 bg-gradient-to-tr from-emerald-100 to-amber-100 rounded-[2rem] rotate-3 opacity-70"></div>
                <ImageWithFallback 
                  src="https://images.unsplash.com/photo-1576267423445-b2e0074d68a4?q=80&w=800&auto=format&fit=crop" 
-                 alt="AJECB Community" 
+                 alt="AJDCB Community" 
                  className="relative rounded-[1.5rem] shadow-2xl w-full object-cover aspect-[4/3]"
                />
                <div className="absolute -bottom-8 -right-8 bg-white p-6 rounded-2xl shadow-xl border border-slate-100 hidden md:block">
@@ -172,7 +172,7 @@ export function Home() {
                 Une organisation apolitique au service de l'<span className="text-amber-500">Excellence</span>.
               </h3>
               <p className="text-lg text-slate-600 mb-6 leading-relaxed">
-                Créée par de jeunes Congolais établis au Bénin, l’AJECB est plus qu'une association : c'est un écosystème de croissance.
+                Créée par de jeunes Congolais établis au Bénin, l’AJDCB est plus qu'une association : c'est un écosystème de croissance.
               </p>
               <p className="text-lg text-slate-600 mb-10 leading-relaxed">
                 Nous offrons un cadre structuré où chaque membre peut s'intégrer, se former et contribuer au rayonnement de notre culture et de nos compétences.

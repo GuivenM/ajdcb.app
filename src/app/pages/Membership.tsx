@@ -34,7 +34,7 @@ export const Membership = () => {
             </h2>
             <div className="prose text-slate-600 mb-8">
               <p className="text-lg">
-                Adhérer à l’AJECB, c’est intégrer une communauté solidaire et organisée, et contribuer activement au rayonnement du Congo au Bénin.
+                Adhérer à l’AJDCB, c’est intégrer une communauté solidaire et organisée, et contribuer activement au rayonnement du Congo au Bénin.
               </p>
               
               <h4 className="text-slate-900 font-bold mt-6 mb-2">Conditions d'adhésion :</h4>
@@ -141,7 +141,7 @@ export const Membership = () => {
                   Partenariats
                 </h2>
                 <p className="text-slate-600 text-lg mb-6">
-                  S’associer à l’AJECB, c’est soutenir des projets à fort impact social et renforcer la coopération Congo – Bénin.
+                  S’associer à l’AJDCB, c’est soutenir des projets à fort impact social et renforcer la coopération Congo – Bénin.
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   {['Institutions', 'ONG', 'Entreprises', 'Universités'].map((tag) => (

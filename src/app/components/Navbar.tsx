@@ -28,7 +28,7 @@ export function Navbar() {
 
   const navLinks = [
     { name: 'Accueil', path: '/' },
-    { name: 'L’AJECB', path: '/about' },
+    { name: 'L’AJDCB', path: '/about' },
     { name: 'Nos Actions', path: '/actions' },
     { name: 'Guide', path: '/guide' },
     { name: 'Actualités', path: '/news' },
@@ -64,7 +64,7 @@ export function Navbar() {
                   "font-black text-xl leading-none tracking-tight transition-colors",
                   scrolled ? "text-slate-900" : "text-white"
                 )}>
-                  AJECB
+                  AJDCB
                 </span>
                 <span className={cn(
                   "text-[10px] font-bold uppercase tracking-widest mt-0.5 transition-colors",

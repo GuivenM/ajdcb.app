@@ -14,11 +14,11 @@ export function Footer() {
               <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-900/20">
                 A
               </div>
-              <span className="font-bold text-2xl text-white tracking-tight">AJECB</span>
+              <span className="font-bold text-2xl text-white tracking-tight">AJDCB</span>
             </Link>
             <p className="text-slate-500 mb-8 leading-relaxed max-w-sm">
-              L’Association des Jeunes Élites Congolaises au Bénin. <br/>
-              Structurer, intégrer et valoriser la jeunesse congolaise pour un avenir d'excellence.
+              L’Association des Jeunes de la Diaspora Congolaise au Bénin. <br/>
+              Fédérer, intégrer et valoriser la jeunesse congolaise pour un avenir d'excellence.
             </p>
             <div className="flex gap-4">
               {[Facebook, Instagram, Youtube].map((Icon, i) => (
@@ -33,7 +33,7 @@ export function Footer() {
           <div className="lg:col-span-2">
             <h3 className="text-white font-bold mb-6">Navigation</h3>
             <ul className="space-y-4">
-              {['Accueil', 'L’AJECB', 'Nos Actions', 'Guide', 'Actualités'].map((item, i) => (
+              {['Accueil', 'L’AJDCB', 'Nos Actions', 'Guide', 'Actualités'].map((item, i) => (
                 <li key={i}>
                   <Link to="#" className="hover:text-emerald-500 transition-colors flex items-center gap-2 group">
                     <span className="w-1 h-1 rounded-full bg-slate-700 group-hover:bg-emerald-500 transition-colors"></span>
@@ -74,17 +74,17 @@ export function Footer() {
             
             <div className="space-y-3 text-sm">
                <div className="flex items-center gap-3">
-                 <MapPin size={16} className="text-emerald-600" /> Cotonou, Bénin
+                 <MapPin size={16} className="text-emerald-600" /> Akpakpa / Ayélawadjè, Cotonou
                </div>
                <div className="flex items-center gap-3">
-                 <Mail size={16} className="text-emerald-600" /> contact@ajecb.org
+                 <Mail size={16} className="text-emerald-600" /> contact@ajdcb.org
                </div>
             </div>
           </div>
         </div>
 
         <div className="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600">
-          <p>&copy; {new Date().getFullYear()} AJECB. Tous droits réservés.</p>
+          <p>&copy; {new Date().getFullYear()} AJDCB. Tous droits réservés.</p>
           <p>Designed with excellence for the Youth.</p>
         </div>
       </div>
