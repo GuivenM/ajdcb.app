@@ -54,10 +54,10 @@ export function Navbar() {
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
               <div className={cn(
-                "w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-xl transition-transform duration-300 group-hover:rotate-6",
-                scrolled ? "bg-emerald-700" : "bg-white/20 backdrop-blur-md border border-white/20"
+                "w-12 h-12 rounded-2xl overflow-hidden flex items-center justify-center shadow-xl transition-transform duration-300 group-hover:rotate-6 bg-white p-1.5",
+                scrolled ? "ring-1 ring-slate-100" : "ring-1 ring-white/40"
               )}>
-                A
+                <img src="/logo-mark-ajdcb.png" alt="AJDCB" className="w-full h-full object-contain" />
               </div>
               <div className="flex flex-col">
                 <span className={cn(
@@ -68,7 +68,7 @@ export function Navbar() {
                 </span>
                 <span className={cn(
                   "text-[10px] font-bold uppercase tracking-widest mt-0.5 transition-colors",
-                  scrolled ? "text-emerald-600" : "text-white/80"
+                  scrolled ? "text-brand-green-600" : "text-white/80"
                 )}>
                   Bénin
                 </span>
@@ -84,8 +84,8 @@ export function Navbar() {
                   className={({ isActive }) => cn(
                     "relative px-4 py-2 text-sm font-semibold transition-all duration-300 rounded-full hover:bg-white/10",
                     isActive 
-                      ? (scrolled ? "text-emerald-700 bg-emerald-50" : "text-white bg-white/20 backdrop-blur-md") 
-                      : (scrolled ? "text-slate-600 hover:text-emerald-700" : "text-white/80 hover:text-white")
+                      ? (scrolled ? "text-brand-green-700 bg-brand-green-50" : "text-white bg-white/20 backdrop-blur-md") 
+                      : (scrolled ? "text-slate-600 hover:text-brand-green-700" : "text-white/80 hover:text-white")
                   )}
                 >
                   {link.name}
@@ -96,8 +96,8 @@ export function Navbar() {
                 className={cn(
                   "ml-4 px-6 py-2.5 rounded-full text-sm font-bold shadow-lg transition-all transform hover:-translate-y-0.5 hover:shadow-xl active:scale-95",
                   scrolled 
-                    ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white hover:shadow-emerald-200" 
-                    : "bg-white text-emerald-900 hover:bg-gray-100"
+                    ? "bg-gradient-to-r from-brand-green-600 to-brand-green-500 text-white hover:shadow-brand-green-200" 
+                    : "bg-white text-brand-green-900 hover:bg-gray-100"
                 )}
               >
                 Rejoindre
@@ -140,7 +140,7 @@ export function Navbar() {
                     to={link.path}
                     className={({ isActive }) => cn(
                       "flex items-center justify-between p-4 text-xl font-bold border-b border-gray-100 transition-colors",
-                      isActive ? "text-emerald-600" : "text-slate-800"
+                      isActive ? "text-brand-green-600" : "text-slate-800"
                     )}
                   >
                     {link.name}
@@ -154,7 +154,7 @@ export function Navbar() {
                 transition={{ delay: 0.5 }}
                 className="mt-8 grid grid-cols-2 gap-4"
               >
-                 <Link to="/join" className="py-4 bg-emerald-600 text-white text-center font-bold rounded-2xl shadow-lg active:scale-95 transition-transform">
+                 <Link to="/join" className="py-4 bg-brand-green-600 text-white text-center font-bold rounded-2xl shadow-lg active:scale-95 transition-transform">
                    Adhérer
                  </Link>
                  <Link to="/contact" className="py-4 bg-slate-100 text-slate-900 text-center font-bold rounded-2xl active:scale-95 transition-transform">

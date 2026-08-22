@@ -32,9 +32,9 @@ export function Join() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           {/* Card 1: Standard */}
-          <div className={`bg-white p-10 rounded-[2.5rem] text-left transition-all duration-300 ${activePlan === 'membre' ? 'shadow-2xl scale-105 border-2 border-emerald-500 relative z-10' : 'shadow-lg border border-slate-100 opacity-60'}`}>
+          <div className={`bg-white p-10 rounded-[2.5rem] text-left transition-all duration-300 ${activePlan === 'membre' ? 'shadow-2xl scale-105 border-2 border-brand-green-500 relative z-10' : 'shadow-lg border border-slate-100 opacity-60'}`}>
             {activePlan === 'membre' && (
-              <div className="absolute top-0 right-0 bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-bl-2xl rounded-tr-[2.2rem]">RECOMMANDÉ</div>
+              <div className="absolute top-0 right-0 bg-brand-green-500 text-white text-xs font-bold px-4 py-2 rounded-bl-2xl rounded-tr-[2.2rem]">RECOMMANDÉ</div>
             )}
             <h3 className="text-2xl font-bold text-slate-900 mb-2">Adhésion Membre</h3>
             <div className="flex items-baseline gap-1 mb-6">
@@ -46,19 +46,19 @@ export function Join() {
             <ul className="space-y-4 mb-8">
               {['Carte de membre officielle', 'Accès aux formations', 'Réseau de mentorat', 'Assistance sociale'].map((feat, i) => (
                 <li key={i} className="flex items-center gap-3 text-slate-700 font-medium">
-                  <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><Check size={14} /></div>
+                  <div className="w-6 h-6 rounded-full bg-brand-green-100 text-brand-green-600 flex items-center justify-center shrink-0"><Check size={14} /></div>
                   {feat}
                 </li>
               ))}
             </ul>
             
-            <button className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-emerald-200">
+            <button className="w-full py-4 bg-brand-green-600 hover:bg-brand-green-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-brand-green-200">
               Adhérer maintenant
             </button>
           </div>
 
           {/* Card 2: Partner */}
-          <div className={`bg-slate-900 p-10 rounded-[2.5rem] text-left transition-all duration-300 text-white ${activePlan === 'partenaire' ? 'shadow-2xl scale-105 border-2 border-amber-500 relative z-10' : 'shadow-lg border border-slate-800 opacity-80'}`}>
+          <div className={`bg-slate-900 p-10 rounded-[2.5rem] text-left transition-all duration-300 text-white ${activePlan === 'partenaire' ? 'shadow-2xl scale-105 border-2 border-brand-gold-500 relative z-10' : 'shadow-lg border border-slate-800 opacity-80'}`}>
              <h3 className="text-2xl font-bold mb-2">Partenaire / Sponsor</h3>
             <div className="flex items-baseline gap-1 mb-6">
               <span className="text-4xl font-black">Sur mesure</span>
@@ -68,13 +68,13 @@ export function Join() {
             <ul className="space-y-4 mb-8">
               {['Visibilité sur nos événements', 'Accès à notre vivier de talents', 'Responsabilité Sociale (RSE)', 'Opportunités B2B'].map((feat, i) => (
                 <li key={i} className="flex items-center gap-3 text-slate-300 font-medium">
-                  <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center shrink-0"><Check size={14} /></div>
+                  <div className="w-6 h-6 rounded-full bg-brand-gold-500/20 text-brand-gold-500 flex items-center justify-center shrink-0"><Check size={14} /></div>
                   {feat}
                 </li>
               ))}
             </ul>
             
-            <button className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-xl transition-colors shadow-lg shadow-amber-900/20">
+            <button className="w-full py-4 bg-brand-gold-500 hover:bg-brand-gold-400 text-slate-900 font-bold rounded-xl transition-colors shadow-lg shadow-brand-gold-900/20">
               Contacter le Bureau
             </button>
           </div>

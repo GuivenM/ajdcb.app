@@ -7,8 +7,9 @@ export function About() {
     <div className="bg-white min-h-screen">
       {/* Header */}
       <div className="bg-slate-900 pt-32 pb-20 rounded-b-[3rem] relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/50 to-slate-900/50"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-green-900/50 to-slate-900/50"></div>
         <div className="container mx-auto px-4 relative z-10 text-center">
+           <img src="/logo-mark-ajdcb.png" alt="AJDCB" className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-white p-2 shadow-xl" />
            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">L’AJDCB</h1>
            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
              Découvrez l'histoire, la vision et l'équipe qui porte les ambitions de la jeunesse congolaise au Bénin.
@@ -20,9 +21,9 @@ export function About() {
         {/* Mission Vision Values - Modern Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32 -mt-32 relative z-20">
           {[
-            { title: "Vision", desc: "Faire de la diaspora congolaise au Bénin un modèle d'unité, de solidarité et d'intégration réussie.", color: "bg-emerald-600", text: "text-white" },
+            { title: "Vision", desc: "Faire de la diaspora congolaise au Bénin un modèle d'unité, de solidarité et d'intégration réussie.", color: "bg-brand-green-600", text: "text-white" },
             { title: "Mission", desc: "Fédérer les jeunes Congolais du Bénin, favoriser leur épanouissement et valoriser leurs talents.", color: "bg-white", text: "text-slate-900" },
-            { title: "Valeurs", desc: "Unité, Solidarité, Réflexion et Action.", color: "bg-amber-400", text: "text-emerald-950" }
+            { title: "Valeurs", desc: "Unité, Solidarité, Réflexion et Action.", color: "bg-brand-gold-400", text: "text-brand-green-950" }
           ].map((card, i) => (
             <motion.div
               key={i}
@@ -40,9 +41,9 @@ export function About() {
         {/* Story Section */}
         <div className="max-w-4xl mx-auto mb-32">
           <div className="flex gap-4 mb-8">
-            <span className="text-8xl font-serif text-emerald-100 leading-none -mt-8">"</span>
+            <span className="text-8xl font-serif text-brand-green-100 leading-none -mt-8">"</span>
             <p className="text-2xl md:text-3xl font-light text-slate-800 leading-relaxed text-center">
-              L’AJDCB est née d’une conviction simple : <span className="font-bold text-emerald-600">une jeunesse organisée</span> est une force de transformation irrésistible.
+              L’AJDCB est née d’une conviction simple : <span className="font-bold text-brand-green-600">une jeunesse organisée</span> est une force de transformation irrésistible.
             </p>
           </div>
           <div className="text-center">
@@ -67,7 +68,7 @@ export function About() {
               <div key={i} className="bg-slate-50 p-6 rounded-2xl text-center hover:bg-white hover:shadow-lg transition-all border border-slate-100">
                 <div className="w-24 h-24 bg-slate-200 rounded-full mx-auto mb-4"></div>
                 <h3 className="font-bold text-slate-900">{member.name}</h3>
-                <p className="text-sm text-emerald-600 font-medium">{member.role}</p>
+                <p className="text-sm text-brand-green-600 font-medium">{member.role}</p>
               </div>
             ))}
           </div>

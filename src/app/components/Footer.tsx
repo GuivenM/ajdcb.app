@@ -11,8 +11,8 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-4">
             <Link to="/" className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-900/20">
-                A
+              <div className="w-10 h-10 bg-white rounded-xl overflow-hidden flex items-center justify-center shadow-lg shadow-black/20 p-1">
+                <img src="/logo-mark-ajdcb.png" alt="AJDCB" className="w-full h-full object-contain" />
               </div>
               <span className="font-bold text-2xl text-white tracking-tight">AJDCB</span>
             </Link>
@@ -22,7 +22,7 @@ export function Footer() {
             </p>
             <div className="flex gap-4">
               {[Facebook, Instagram, Youtube].map((Icon, i) => (
-                <a key={i} href="#" className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all duration-300 group">
+                <a key={i} href="#" className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center hover:bg-brand-green-600 hover:text-white transition-all duration-300 group">
                   <Icon size={18} className="group-hover:scale-110 transition-transform" />
                 </a>
               ))}
@@ -35,8 +35,8 @@ export function Footer() {
             <ul className="space-y-4">
               {['Accueil', 'L’AJDCB', 'Nos Actions', 'Guide', 'Actualités'].map((item, i) => (
                 <li key={i}>
-                  <Link to="#" className="hover:text-emerald-500 transition-colors flex items-center gap-2 group">
-                    <span className="w-1 h-1 rounded-full bg-slate-700 group-hover:bg-emerald-500 transition-colors"></span>
+                  <Link to="#" className="hover:text-brand-green-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-slate-700 group-hover:bg-brand-green-500 transition-colors"></span>
                     {item}
                   </Link>
                 </li>
@@ -50,7 +50,7 @@ export function Footer() {
             <ul className="space-y-4">
               {['Mentions légales', 'Politique de confidentialité', 'Statuts (PDF)', 'Règlement (PDF)'].map((item, i) => (
                 <li key={i}>
-                  <Link to="#" className="hover:text-emerald-500 transition-colors">
+                  <Link to="#" className="hover:text-brand-green-500 transition-colors">
                     {item}
                   </Link>
                 </li>
@@ -61,23 +61,23 @@ export function Footer() {
           {/* Newsletter / Contact */}
           <div className="lg:col-span-4">
             <h3 className="text-white font-bold mb-6">Restez informés</h3>
-            <div className="bg-slate-900 p-1 rounded-full border border-slate-800 flex items-center mb-8 focus-within:border-emerald-600 transition-colors">
+            <div className="bg-slate-900 p-1 rounded-full border border-slate-800 flex items-center mb-8 focus-within:border-brand-green-600 transition-colors">
               <input 
                 type="email" 
                 placeholder="Votre email" 
                 className="bg-transparent border-none text-white px-4 py-2 w-full focus:ring-0 placeholder:text-slate-600 outline-none"
               />
-              <button className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center text-white hover:bg-emerald-500 transition-colors">
+              <button className="w-10 h-10 rounded-full bg-brand-green-600 flex items-center justify-center text-white hover:bg-brand-green-500 transition-colors">
                 <ArrowRight size={18} />
               </button>
             </div>
             
             <div className="space-y-3 text-sm">
                <div className="flex items-center gap-3">
-                 <MapPin size={16} className="text-emerald-600" /> Akpakpa / Ayélawadjè, Cotonou
+                 <MapPin size={16} className="text-brand-green-600" /> Akpakpa / Ayélawadjè, Cotonou
                </div>
                <div className="flex items-center gap-3">
-                 <Mail size={16} className="text-emerald-600" /> contact@ajdcb.org
+                 <Mail size={16} className="text-brand-green-600" /> contact@ajdcb.org
                </div>
             </div>
           </div>

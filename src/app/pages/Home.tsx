@@ -16,29 +16,29 @@ const axes = [
     title: "Solidarité",
     icon: <Users className="w-8 h-8" />,
     desc: "Un réseau d'entraide puissant pour chaque Congolais.",
-    color: "from-amber-400 to-orange-500",
-    bg: "bg-amber-50"
+    color: "from-brand-gold-400 to-orange-500",
+    bg: "bg-brand-gold-50"
   },
   {
     title: "Éducation",
     icon: <GraduationCap className="w-8 h-8" />,
     desc: "Programmes de mentorat et bourses d'excellence.",
-    color: "from-blue-400 to-indigo-500",
-    bg: "bg-blue-50"
+    color: "from-brand-green-400 to-brand-green-600",
+    bg: "bg-brand-green-50"
   },
   {
     title: "Culture",
     icon: <Globe className="w-8 h-8" />,
     desc: "Rayonnement de l'identité congolaise au Bénin.",
-    color: "from-emerald-400 to-green-500",
-    bg: "bg-emerald-50"
+    color: "from-brand-gold-400 to-brand-gold-600",
+    bg: "bg-brand-gold-50"
   },
   {
     title: "Partenariats",
     icon: <Handshake className="w-8 h-8" />,
     desc: "Collaborations stratégiques institutionnelles.",
-    color: "from-purple-400 to-pink-500",
-    bg: "bg-purple-50"
+    color: "from-brand-red-400 to-brand-red-600",
+    bg: "bg-brand-red-50"
   }
 ];
 
@@ -57,7 +57,7 @@ export function Home() {
             alt="Hero Background"
             className="w-full h-full object-cover scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/95 via-emerald-900/80 to-slate-900/40" />
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-green-950/95 via-brand-green-900/80 to-slate-900/40" />
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"></div>
         </div>
 
@@ -69,8 +69,8 @@ export function Home() {
               transition={{ duration: 0.8 }}
               className="flex flex-col md:flex-row gap-2 items-start md:items-center mb-6"
             >
-              <div className="h-1 w-20 bg-amber-400 rounded-full"></div>
-              <span className="text-amber-400 font-bold tracking-widest uppercase text-sm">Solidarité – Réﬂexion – Action</span>
+              <div className="h-1 w-20 bg-brand-gold-400 rounded-full"></div>
+              <span className="text-brand-gold-400 font-bold tracking-widest uppercase text-sm">Solidarité – Réﬂexion – Action</span>
             </motion.div>
             
             <motion.h1 
@@ -80,7 +80,7 @@ export function Home() {
               className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-[0.9] tracking-tight"
             >
               La Diaspora Congolaise <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-200 to-white">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-green-400 via-brand-green-200 to-white">
                 au cœur du Bénin.
               </span>
             </motion.h1>
@@ -101,13 +101,13 @@ export function Home() {
               transition={{ delay: 0.6, duration: 0.8 }}
               className="flex flex-col sm:flex-row gap-6 items-start"
             >
-              <Link to="/join" className="group relative px-8 py-4 bg-emerald-600 text-white font-bold text-lg rounded-full overflow-hidden shadow-2xl transition-all hover:scale-105 active:scale-95">
+              <Link to="/join" className="group relative px-8 py-4 bg-brand-green-600 text-white font-bold text-lg rounded-full overflow-hidden shadow-2xl transition-all hover:scale-105 active:scale-95">
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                 <span className="relative flex items-center gap-2">
                   Rejoindre l'AJDCB <ArrowRight size={20} />
                 </span>
               </Link>
-              <Link to="/about" className="flex items-center gap-4 px-8 py-4 text-white font-medium hover:text-emerald-300 transition-colors group">
+              <Link to="/about" className="flex items-center gap-4 px-8 py-4 text-white font-medium hover:text-brand-green-300 transition-colors group">
                 <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20 group-hover:bg-white/20 transition-all">
                   <Play size={20} fill="currentColor" className="ml-1" />
                 </div>
@@ -149,7 +149,7 @@ export function Home() {
               transition={{ duration: 0.8 }}
               className="lg:w-1/2 relative"
             >
-               <div className="absolute -inset-4 bg-gradient-to-tr from-emerald-100 to-amber-100 rounded-[2rem] rotate-3 opacity-70"></div>
+               <div className="absolute -inset-4 bg-gradient-to-tr from-brand-green-100 to-brand-gold-100 rounded-[2rem] rotate-3 opacity-70"></div>
                <ImageWithFallback 
                  src="https://images.unsplash.com/photo-1576267423445-b2e0074d68a4?q=80&w=800&auto=format&fit=crop" 
                  alt="AJDCB Community" 
@@ -167,9 +167,9 @@ export function Home() {
               transition={{ duration: 0.8 }}
               className="lg:w-1/2"
             >
-              <h2 className="text-sm font-bold text-emerald-600 uppercase tracking-widest mb-4">Qui sommes-nous ?</h2>
+              <h2 className="text-sm font-bold text-brand-green-600 uppercase tracking-widest mb-4">Qui sommes-nous ?</h2>
               <h3 className="text-4xl md:text-5xl font-bold text-slate-900 mb-8 leading-tight">
-                Une organisation apolitique au service de l'<span className="text-amber-500">Excellence</span>.
+                Une organisation apolitique au service de l'<span className="text-brand-gold-500">Excellence</span>.
               </h3>
               <p className="text-lg text-slate-600 mb-6 leading-relaxed">
                 Créée par de jeunes Congolais établis au Bénin, l’AJDCB est plus qu'une association : c'est un écosystème de croissance.
@@ -178,7 +178,7 @@ export function Home() {
                 Nous offrons un cadre structuré où chaque membre peut s'intégrer, se former et contribuer au rayonnement de notre culture et de nos compétences.
               </p>
               
-              <Link to="/about" className="inline-flex items-center gap-2 text-emerald-800 font-bold border-b-2 border-emerald-800 pb-1 hover:text-emerald-600 hover:border-emerald-600 transition-all">
+              <Link to="/about" className="inline-flex items-center gap-2 text-brand-green-800 font-bold border-b-2 border-brand-green-800 pb-1 hover:text-brand-green-600 hover:border-brand-green-600 transition-all">
                 En savoir plus <ChevronRight size={18} />
               </Link>
             </motion.div>
@@ -217,7 +217,7 @@ export function Home() {
                 <h3 className="text-2xl font-bold text-slate-900 mb-3 relative z-10">{axis.title}</h3>
                 <p className="text-slate-500 mb-8 relative z-10 group-hover:text-slate-600">{axis.desc}</p>
                 
-                <Link to="/actions" className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 text-slate-400 group-hover:bg-emerald-600 group-hover:border-transparent group-hover:text-white transition-all">
+                <Link to="/actions" className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 text-slate-400 group-hover:bg-brand-green-600 group-hover:border-transparent group-hover:text-white transition-all">
                   <ArrowRight size={16} />
                 </Link>
               </motion.div>
@@ -234,7 +234,7 @@ export function Home() {
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-4">
             <div>
               <h2 className="text-4xl font-bold text-slate-900 mb-2">Actualités & Events</h2>
-              <div className="h-1.5 w-24 bg-emerald-500 rounded-full"></div>
+              <div className="h-1.5 w-24 bg-brand-green-500 rounded-full"></div>
             </div>
             <Link to="/news" className="px-6 py-3 rounded-full border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors">
               Voir tout le journal
@@ -260,18 +260,18 @@ export function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
                      <span className="text-white font-semibold flex items-center gap-2">Lire l'article <ArrowRight size={16} /></span>
                   </div>
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider text-emerald-800 shadow-sm">
+                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider text-brand-green-800 shadow-sm">
                     {i === 1 ? 'Culture' : 'Éducation'}
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-3 text-sm text-slate-500 mb-3">
-                  <span className="font-medium text-emerald-600">12 Février 2026</span>
+                  <span className="font-medium text-brand-green-600">12 Février 2026</span>
                   <span className="w-1 h-1 rounded-full bg-slate-300"></span>
                   <span>5 min de lecture</span>
                 </div>
                 
-                <h3 className="text-xl font-bold text-slate-900 mb-3 leading-snug group-hover:text-emerald-700 transition-colors">
+                <h3 className="text-xl font-bold text-slate-900 mb-3 leading-snug group-hover:text-brand-green-700 transition-colors">
                   {i === 1 ? 'Retour sur la soirée culturelle "Nuit du Congo"' : i === 2 ? 'Lancement officiel du programme de bourses 2026' : 'Rencontre avec les nouveaux étudiants à Cotonou'}
                 </h3>
               </motion.div>
@@ -284,12 +284,12 @@ export function Home() {
         CTA SECTION - Innovative Gradient
       */}
       <section className="py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-emerald-900">
-           <div className="absolute inset-0 bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900"></div>
+        <div className="absolute inset-0 bg-brand-green-900">
+           <div className="absolute inset-0 bg-gradient-to-r from-brand-green-900 via-brand-green-800 to-teal-900"></div>
            <div className="absolute top-0 left-0 w-full h-full opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
            {/* Animated blobs */}
-           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-           <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-green-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+           <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-brand-gold-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
         </div>
 
         <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
@@ -303,12 +303,12 @@ export function Home() {
             <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 tracking-tight">
               Prêt à impacter votre avenir ?
             </h2>
-            <p className="text-xl text-emerald-100 mb-12 max-w-2xl mx-auto font-light">
+            <p className="text-xl text-brand-green-100 mb-12 max-w-2xl mx-auto font-light">
               Rejoignez une communauté d'élite. Ensemble, transformons les défis en opportunités.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/join" className="px-10 py-5 bg-white text-emerald-900 font-bold text-lg rounded-full shadow-2xl hover:bg-emerald-50 hover:scale-105 transition-all duration-300">
+              <Link to="/join" className="px-10 py-5 bg-white text-brand-green-900 font-bold text-lg rounded-full shadow-2xl hover:bg-brand-green-50 hover:scale-105 transition-all duration-300">
                 Devenir membre
               </Link>
               <Link to="/contact" className="px-10 py-5 bg-transparent border border-white/30 text-white font-bold text-lg rounded-full hover:bg-white/10 transition-all duration-300">

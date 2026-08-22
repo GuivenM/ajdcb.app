@@ -51,7 +51,7 @@ export function Actions() {
       {/* Header with Pattern */}
       <div className="relative bg-slate-900 text-white py-32 overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]"></div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-green-500/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
         
         <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
           <motion.div
@@ -59,11 +59,11 @@ export function Actions() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-emerald-300 font-medium text-sm mb-6 backdrop-blur-md">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-brand-green-300 font-medium text-sm mb-6 backdrop-blur-md">
               Nos domaines d'intervention
             </span>
             <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
-              Impact & <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-amber-400">Actions</span>
+              Impact & <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-green-400 to-brand-gold-400">Actions</span>
             </h1>
             <p className="text-xl text-slate-300 max-w-2xl mx-auto font-light">
               Découvrez comment nous transformons la vie de la communauté congolaise au Bénin à travers quatre piliers d'excellence.

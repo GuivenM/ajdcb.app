@@ -21,7 +21,7 @@ export function Contact() {
               animate={{ opacity: 1, y: 0 }}
               className="text-5xl font-bold text-slate-900 mb-6"
             >
-              Parlons de <br/> <span className="text-emerald-600">votre projet.</span>
+              Parlons de <br/> <span className="text-brand-green-600">votre projet.</span>
             </motion.h1>
             <p className="text-xl text-slate-500 mb-12">
               Que vous souhaitiez adhérer, devenir partenaire ou simplement poser une question, notre équipe est à votre écoute.
@@ -52,25 +52,25 @@ export function Contact() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-900 ml-1">Nom</label>
-                  <input type="text" className="w-full px-6 py-4 rounded-xl border border-transparent bg-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none" placeholder="Votre nom" />
+                  <input type="text" className="w-full px-6 py-4 rounded-xl border border-transparent bg-white focus:ring-2 focus:ring-brand-green-500 transition-all outline-none" placeholder="Votre nom" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-900 ml-1">Prénom</label>
-                  <input type="text" className="w-full px-6 py-4 rounded-xl border border-transparent bg-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none" placeholder="Votre prénom" />
+                  <input type="text" className="w-full px-6 py-4 rounded-xl border border-transparent bg-white focus:ring-2 focus:ring-brand-green-500 transition-all outline-none" placeholder="Votre prénom" />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-900 ml-1">Email</label>
-                <input type="email" className="w-full px-6 py-4 rounded-xl border border-transparent bg-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none" placeholder="nom@exemple.com" />
+                <input type="email" className="w-full px-6 py-4 rounded-xl border border-transparent bg-white focus:ring-2 focus:ring-brand-green-500 transition-all outline-none" placeholder="nom@exemple.com" />
               </div>
 
               <div className="space-y-2">
                  <label className="text-sm font-bold text-slate-900 ml-1">Message</label>
-                 <textarea rows={4} className="w-full px-6 py-4 rounded-xl border border-transparent bg-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none" placeholder="Comment pouvons-nous vous aider ?"></textarea>
+                 <textarea rows={4} className="w-full px-6 py-4 rounded-xl border border-transparent bg-white focus:ring-2 focus:ring-brand-green-500 transition-all outline-none" placeholder="Comment pouvons-nous vous aider ?"></textarea>
               </div>
 
-              <button className="w-full py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2">
+              <button className="w-full py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-brand-green-600 transition-colors flex items-center justify-center gap-2">
                 Envoyer le message <Send size={18} />
               </button>
             </form>

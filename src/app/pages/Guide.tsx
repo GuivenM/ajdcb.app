@@ -6,8 +6,8 @@ export function Guide() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center relative overflow-hidden">
       {/* Background blobs */}
-      <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-emerald-200/20 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2"></div>
-      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-amber-200/20 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2"></div>
+      <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-brand-green-200/20 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2"></div>
+      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-brand-gold-200/20 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2"></div>
 
       <div className="container mx-auto px-4 relative z-10 text-center max-w-2xl">
         <motion.div
@@ -16,7 +16,7 @@ export function Guide() {
           transition={{ duration: 0.6 }}
           className="inline-flex p-6 bg-white rounded-3xl shadow-xl mb-8"
         >
-          <Construction className="w-16 h-16 text-emerald-600" strokeWidth={1.5} />
+          <Construction className="w-16 h-16 text-brand-green-600" strokeWidth={1.5} />
         </motion.div>
 
         <motion.h1 
@@ -47,10 +47,10 @@ export function Guide() {
              <input 
               type="email" 
               placeholder="Votre email" 
-              className="w-full sm:w-80 px-6 py-4 rounded-full border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-sm"
+              className="w-full sm:w-80 px-6 py-4 rounded-full border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-green-500 focus:border-transparent shadow-sm"
              />
           </div>
-          <button className="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full shadow-lg hover:shadow-emerald-200/50 transition-all flex items-center gap-2">
+          <button className="px-8 py-4 bg-brand-green-600 hover:bg-brand-green-700 text-white font-bold rounded-full shadow-lg hover:shadow-brand-green-200/50 transition-all flex items-center gap-2">
             <Bell size={18} /> Me prévenir
           </button>
         </motion.div>

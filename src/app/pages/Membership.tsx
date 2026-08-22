@@ -27,7 +27,7 @@ export const Membership = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start mb-24">
           <div>
             <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-              <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
+              <div className="w-10 h-10 bg-brand-green-100 rounded-full flex items-center justify-center text-brand-green-600">
                 <Heart size={20} />
               </div>
               Devenir Membre
@@ -46,16 +46,16 @@ export const Membership = () => {
                   "S'acquitter de la cotisation mensuelle (1 000 FCFA)"
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-emerald-500 shrink-0" />
+                    <Check className="w-5 h-5 text-brand-green-500 shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-100">
-              <h4 className="font-bold text-emerald-800 mb-2">Pourquoi cotiser ?</h4>
-              <p className="text-emerald-900/70 text-sm">
+            <div className="bg-brand-green-50 p-6 rounded-xl border border-brand-green-100">
+              <h4 className="font-bold text-brand-green-800 mb-2">Pourquoi cotiser ?</h4>
+              <p className="text-brand-green-900/70 text-sm">
                 La cotisation permet de ﬁnancer les actions solidaires (décès, maladie, urgences) et les activités communautaires. C'est le moteur de notre autonomie.
               </p>
             </div>
@@ -67,28 +67,28 @@ export const Membership = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Nom</label>
-                  <input {...register("nom", { required: true })} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none" />
+                  <input {...register("nom", { required: true })} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-green-500 focus:border-transparent outline-none" />
                   {errors.nom && <span className="text-red-500 text-xs">Requis</span>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Prénom</label>
-                  <input {...register("prenom", { required: true })} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none" />
+                  <input {...register("prenom", { required: true })} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-green-500 focus:border-transparent outline-none" />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                <input type="email" {...register("email", { required: true })} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none" />
+                <input type="email" {...register("email", { required: true })} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-green-500 focus:border-transparent outline-none" />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Téléphone / WhatsApp</label>
-                <input type="tel" {...register("tel", { required: true })} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none" />
+                <input type="tel" {...register("tel", { required: true })} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-green-500 focus:border-transparent outline-none" />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Ville de résidence au Bénin</label>
-                <select {...register("ville")} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none">
+                <select {...register("ville")} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-green-500 focus:border-transparent outline-none">
                   <option value="Cotonou">Cotonou</option>
                   <option value="Abomey-Calavi">Abomey-Calavi</option>
                   <option value="Porto-Novo">Porto-Novo</option>
@@ -99,7 +99,7 @@ export const Membership = () => {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Statut</label>
-                <select {...register("statut")} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none">
+                <select {...register("statut")} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-green-500 focus:border-transparent outline-none">
                   <option value="Etudiant">Étudiant</option>
                   <option value="Travailleur">Travailleur</option>
                   <option value="Entrepreneur">Entrepreneur</option>
@@ -108,7 +108,7 @@ export const Membership = () => {
               </div>
 
               <div className="pt-4">
-                <button type="submit" className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors shadow-md">
+                <button type="submit" className="w-full py-3 bg-brand-green-600 hover:bg-brand-green-700 text-white font-bold rounded-xl transition-colors shadow-md">
                   Envoyer ma demande
                 </button>
                 <p className="text-center text-xs text-slate-500 mt-3">
@@ -135,7 +135,7 @@ export const Membership = () => {
              </div>
              <div className="order-1 lg:order-2">
                 <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                  <div className="w-10 h-10 bg-brand-red-100 rounded-full flex items-center justify-center text-brand-red-600">
                     <Handshake size={20} />
                   </div>
                   Partenariats
