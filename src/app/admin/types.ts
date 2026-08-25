@@ -27,6 +27,39 @@ export interface Adhesion {
   updated_at: string;
 }
 
+export type StatutCotisation = 'payee' | 'impayee';
+export type ModePaiement = 'especes' | 'mobile_money' | 'virement' | 'autre';
+
+export interface CotisationMembre {
+  membre_id: number;
+  nom_complet: string;
+  photo_url: string | null;
+  mois: string;
+  cotisation_id: number | null;
+  montant: number;
+  statut: StatutCotisation;
+  date_paiement: string | null;
+  mode_paiement: ModePaiement | null;
+  commentaire: string | null;
+}
+
+export interface CotisationStats {
+  mois: string;
+  nb_membres: number;
+  nb_payees: number;
+  nb_impayees: number;
+  taux_a_jour: number;
+  montant_collecte: number;
+  montant_attendu: number;
+}
+
+export interface CotisationHistoriqueEntry {
+  mois: string;
+  statut: StatutCotisation;
+  date_paiement: string | null;
+  montant: number | null;
+}
+
 export type StatutMembre = 'actif' | 'inactif';
 
 export interface Membre {
