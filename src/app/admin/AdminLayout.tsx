@@ -33,7 +33,7 @@ const navItems: NavItem[] = [
   { label: 'Actions', path: '/admin/actions', icon: Activity, comingSoon: true },
   { label: 'Membres', path: '/admin/membres', icon: Users },
   { label: 'Cotisations', path: '/admin/cotisations', icon: Wallet },
-  { label: 'Événements', path: '/admin/evenements', icon: CalendarDays, comingSoon: true },
+  { label: 'Événements', path: '/admin/evenements', icon: CalendarDays },
   { label: 'Guide', path: '/admin/guide', icon: BookOpen, comingSoon: true },
   { label: 'Partenaires', path: '/admin/partenaires', icon: Handshake, comingSoon: true },
 ];

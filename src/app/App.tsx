@@ -18,6 +18,7 @@ import { AdminAdhesions } from './admin/pages/AdminAdhesions';
 import { AdminMessages } from './admin/pages/AdminMessages';
 import { AdminMembres } from './admin/pages/AdminMembres';
 import { AdminCotisations } from './admin/pages/AdminCotisations';
+import { AdminEvenements } from './admin/pages/AdminEvenements';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -54,6 +55,7 @@ export default function App() {
               <Route path="messages" element={<AdminMessages />} />
               <Route path="membres" element={<AdminMembres />} />
               <Route path="cotisations" element={<AdminCotisations />} />
+              <Route path="evenements" element={<AdminEvenements />} />
             </Route>
           </Route>
         </Routes>

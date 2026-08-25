@@ -60,6 +60,39 @@ export interface CotisationHistoriqueEntry {
   montant: number | null;
 }
 
+export type StatutEvenement = 'publie' | 'brouillon' | 'annule';
+
+export interface Evenement {
+  id: number;
+  titre: string;
+  description: string | null;
+  contenu: string | null;
+  image: string | null;
+  image_url: string | null;
+  date_debut: string;
+  date_fin: string;
+  heure_debut: string | null;
+  heure_fin: string | null;
+  lieu: string | null;
+  adresse: string | null;
+  ville: string | null;
+  type: string | null;
+  categorie: string | null;
+  capacite_max: number | null;
+  nombre_inscrits: number;
+  prix: number | null;
+  devise: string | null;
+  lien_billet: string | null;
+  organisateur: string | null;
+  contact_organisateur: string | null;
+  email_contact: string | null;
+  telephone_contact: string | null;
+  statut: StatutEvenement;
+  statut_evenement: 'passé' | 'à_venir' | 'en_cours';
+  created_at: string;
+  updated_at: string;
+}
+
 export type StatutMembre = 'actif' | 'inactif';
 
 export interface Membre {
