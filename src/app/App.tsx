@@ -9,6 +9,13 @@ import { News } from './pages/News';
 import { Join } from './pages/Join';
 import { Contact } from './pages/Contact';
 import { Toaster } from 'sonner';
+import { AuthProvider } from './context/AuthContext';
+import { AdminLogin } from './admin/AdminLogin';
+import { AdminLayout } from './admin/AdminLayout';
+import { ProtectedRoute } from './admin/ProtectedRoute';
+import { Dashboard } from './admin/Dashboard';
+import { AdminAdhesions } from './admin/pages/AdminAdhesions';
+import { AdminMessages } from './admin/pages/AdminMessages';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -24,17 +31,29 @@ export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="about" element={<About />} />
-          <Route path="actions" element={<Actions />} />
-          <Route path="guide" element={<Guide />} />
-          <Route path="news" element={<News />} />
-          <Route path="join" element={<Join />} />
-          <Route path="contact" element={<Contact />} />
-        </Route>
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="about" element={<About />} />
+            <Route path="actions" element={<Actions />} />
+            <Route path="guide" element={<Guide />} />
+            <Route path="news" element={<News />} />
+            <Route path="join" element={<Join />} />
+            <Route path="contact" element={<Contact />} />
+          </Route>
+
+          <Route path="/admin/login" element={<AdminLogin />} />
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="adhesions" element={<AdminAdhesions />} />
+              <Route path="messages" element={<AdminMessages />} />
+            </Route>
+          </Route>
+        </Routes>
+      </AuthProvider>
       <Toaster position="top-right" richColors />
     </BrowserRouter>
   );
