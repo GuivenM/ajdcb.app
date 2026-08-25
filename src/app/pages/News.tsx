@@ -1,56 +1,42 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, ArrowUpRight } from 'lucide-react';
+import { Calendar, ArrowUpRight, Loader2 } from 'lucide-react';
+import { api, ApiError } from '../../lib/api';
 
-const news = [
-  {
-    id: 1,
-    category: "Événement",
-    title: "Grande Nuit du Congo à Cotonou",
-    date: "15 Février 2026",
-    image: "https://images.unsplash.com/photo-1514525253440-b393452e3383?q=80&w=800&auto=format&fit=crop",
-    desc: "Une soirée d'exception pour célébrer notre culture avec artistes, gastronomie et défilé de mode.",
-    size: "large"
-  },
-  {
-    id: 2,
-    category: "Éducation",
-    title: "Bourses d'Excellence 2026",
-    date: "10 Février 2026",
-    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
-    desc: "Lancement de l'appel à candidatures pour les étudiants méritants.",
-    size: "small"
-  },
-  {
-    id: 3,
-    category: "Solidarité",
-    title: "Campagne de don de sang",
-    date: "05 Février 2026",
-    image: "https://images.unsplash.com/photo-1615461066841-6116e61058f4?q=80&w=800&auto=format&fit=crop",
-    desc: "La communauté se mobilise pour sauver des vies au CNHU.",
-    size: "small"
-  },
-  {
-    id: 4,
-    category: "Partenariat",
-    title: "Accord signé avec l'UAC",
-    date: "01 Février 2026",
-    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=800&auto=format&fit=crop",
-    desc: "Facilitation des inscriptions pour les nouveaux bacheliers congolais.",
-    size: "small"
-  },
-  {
-    id: 5,
-    category: "Communauté",
-    title: "Tournoi de Football de l'Indépendance",
-    date: "28 Janvier 2026",
-    image: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=800&auto=format&fit=crop",
-    desc: "32 équipes, un seul vainqueur. Retour en images sur la finale.",
-    size: "small"
-  }
+interface Actualite {
+  id: number;
+  titre: string;
+  description: string | null;
+  image_url: string | null;
+  type: string;
+  type_label: string;
+  date: string; // created_at formaté d/m/Y par l'API
+  created_at: string;
+}
+
+const FILTRES = [
+  { label: 'Tous', value: null },
+  { label: 'Événements', value: 'evenement' },
+  { label: 'Éducation', value: 'education' },
+  { label: 'Culture', value: 'culture' },
 ];
 
 export function News() {
+  const [actualites, setActualites] = useState<Actualite[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filtre, setFiltre] = useState<string | null>(null);
+
+  useEffect(() => {
+    api
+      .get<Actualite[]>('/actualites')
+      .then(setActualites)
+      .catch((err) => setError(err instanceof ApiError ? err.message : 'Erreur de chargement'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const items = filtre ? actualites.filter((a) => a.type === filtre) : actualites;
+
   return (
     <div className="bg-slate-50 min-h-screen pt-32 pb-20">
       <div className="container mx-auto px-4 md:px-6">
@@ -59,22 +45,37 @@ export function News() {
             <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">Journal</h1>
             <p className="text-xl text-slate-500">L'actualité de l'AJDCB et de la communauté.</p>
           </div>
-          
-          <div className="flex gap-2 mt-6 md:mt-0">
-            {['Tous', 'Événements', 'Éducation', 'Culture'].map((filter, i) => (
-              <button 
-                key={i}
-                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${i === 0 ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-200'}`}
+
+          <div className="flex gap-2 mt-6 md:mt-0 flex-wrap">
+            {FILTRES.map((f) => (
+              <button
+                key={f.label}
+                onClick={() => setFiltre(f.value)}
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${filtre === f.value ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-200'}`}
               >
-                {filter}
+                {f.label}
               </button>
             ))}
           </div>
         </div>
 
+        {loading && (
+          <div className="flex justify-center py-20 text-slate-400">
+            <Loader2 className="w-8 h-8 animate-spin" />
+          </div>
+        )}
+
+        {error && !loading && (
+          <div className="text-center py-20 text-slate-500">{error}</div>
+        )}
+
+        {!loading && !error && items.length === 0 && (
+          <div className="text-center py-20 text-slate-500">Aucune actualité pour le moment.</div>
+        )}
+
         {/* Bento Grid Layout for News */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[300px]">
-          {news.map((item, index) => (
+          {items.map((item, index) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 20 }}
@@ -82,29 +83,32 @@ export function News() {
               transition={{ delay: index * 0.1 }}
               className={`group relative rounded-3xl overflow-hidden cursor-pointer ${index === 0 ? 'md:col-span-2 md:row-span-2' : ''} bg-white`}
             >
-              <img 
-                src={item.image} 
-                alt={item.title} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+              {item.image_url ? (
+                <img
+                  src={item.image_url}
+                  alt={item.titre}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300" />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
                 <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                   <div className="flex justify-between items-start mb-2">
                     <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-lg text-xs font-bold text-white uppercase tracking-wider">
-                      {item.category}
+                      {item.type_label}
                     </span>
                     <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <ArrowUpRight className="text-white" size={20} />
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-white/70 text-xs mb-2">
-                    <Calendar size={12} /> {item.date}
+                    <Calendar size={14} />
+                    {item.date}
                   </div>
-                  <h3 className={`font-bold text-white mb-2 ${index === 0 ? 'text-3xl' : 'text-xl'}`}>
-                    {item.title}
-                  </h3>
-                  {index === 0 && (
-                    <p className="text-white/80 line-clamp-2 text-sm">{item.desc}</p>
+                  <h3 className="text-white font-bold text-lg leading-tight">{item.titre}</h3>
+                  {item.description && (
+                    <p className="text-white/70 text-sm mt-2 line-clamp-2">{item.description}</p>
                   )}
                 </div>
               </div>

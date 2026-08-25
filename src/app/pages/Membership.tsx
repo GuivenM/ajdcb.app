@@ -1,6 +1,9 @@
 import React from 'react';
 import { Check, Heart, Handshake } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { FedaPayButton } from '../components/FedaPayButton';
+
+const moisCourant = new Date().toISOString().slice(0, 7); // format AAAA-MM attendu par l'API
 
 export const Membership = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -58,6 +61,15 @@ export const Membership = () => {
               <p className="text-brand-green-900/70 text-sm">
                 La cotisation permet de ﬁnancer les actions solidaires (décès, maladie, urgences) et les activités communautaires. C'est le moteur de notre autonomie.
               </p>
+            </div>
+
+            <div className="mt-6">
+              <FedaPayButton
+                endpoint="/paiements/cotisation"
+                extraPayload={{ mois: moisCourant }}
+                montant={1000}
+                label={`Payer ma cotisation de ${new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}`}
+              />
             </div>
           </div>
 

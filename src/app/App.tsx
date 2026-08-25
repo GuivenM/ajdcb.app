@@ -6,6 +6,7 @@ import { About } from './pages/About';
 import { Actions } from './pages/Actions';
 import { Guide } from './pages/Guide';
 import { News } from './pages/News';
+import { Events } from './pages/Events';
 import { Join } from './pages/Join';
 import { Contact } from './pages/Contact';
 import { Toaster } from 'sonner';
@@ -42,6 +43,7 @@ export default function App() {
             <Route path="actions" element={<Actions />} />
             <Route path="guide" element={<Guide />} />
             <Route path="news" element={<News />} />
+            <Route path="events" element={<Events />} />
             <Route path="join" element={<Join />} />
             <Route path="contact" element={<Contact />} />
           </Route>
