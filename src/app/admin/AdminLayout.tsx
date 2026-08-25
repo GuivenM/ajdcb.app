@@ -29,13 +29,13 @@ const navItems: NavItem[] = [
   { label: 'Tableau de bord', path: '/admin', icon: LayoutDashboard },
   { label: 'Adhésions', path: '/admin/adhesions', icon: UserPlus },
   { label: 'Messages', path: '/admin/messages', icon: Mail },
-  { label: 'Actualités', path: '/admin/actualites', icon: Newspaper, comingSoon: true },
-  { label: 'Actions', path: '/admin/actions', icon: Activity, comingSoon: true },
+  { label: 'Actualités', path: '/admin/actualites', icon: Newspaper },
+  { label: 'Actions', path: '/admin/actions', icon: Activity },
   { label: 'Membres', path: '/admin/membres', icon: Users },
   { label: 'Cotisations', path: '/admin/cotisations', icon: Wallet },
   { label: 'Événements', path: '/admin/evenements', icon: CalendarDays },
-  { label: 'Guide', path: '/admin/guide', icon: BookOpen, comingSoon: true },
-  { label: 'Partenaires', path: '/admin/partenaires', icon: Handshake, comingSoon: true },
+  { label: 'Guide', path: '/admin/guide', icon: BookOpen },
+  { label: 'Partenaires', path: '/admin/partenaires', icon: Handshake },
 ];
 
 export function AdminLayout() {

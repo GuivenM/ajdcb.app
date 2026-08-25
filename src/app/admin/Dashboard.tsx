@@ -105,8 +105,7 @@ export function Dashboard() {
           </div>
 
           <p className="text-sm text-slate-400 mt-6">
-            Actualités, Actions, Membres, Événements, Guide et Partenaires arrivent prochainement
-            dans cet espace.
+            Tous les modules prévus pour cette V1 sont maintenant en place.
           </p>
         </>
       )}

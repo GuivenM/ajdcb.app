@@ -93,6 +93,122 @@ export interface Evenement {
   updated_at: string;
 }
 
+export type StatutActualite = 'publie' | 'brouillon';
+export type TypeActualite = 'actualite' | 'evenement' | 'education' | 'culture';
+
+export interface Actualite {
+  id: number;
+  titre: string;
+  slug: string;
+  description: string;
+  contenu: string;
+  image: string | null;
+  image_url: string | null;
+  type: TypeActualite;
+  type_label: string;
+  date_evenement: string | null;
+  lieu_evenement: string | null;
+  auteur: string;
+  statut: StatutActualite;
+  created_at: string;
+  updated_at: string;
+}
+
+export type StatutGuide = 'publie' | 'brouillon';
+
+export interface GuideDocument {
+  id: number;
+  sous_section_id: number;
+  titre: string;
+  description: string | null;
+  fichier: string;
+  fichier_url: string;
+  type_fichier: string;
+  taille: number;
+  taille_formatee: string;
+  telechargements: number;
+  statut: StatutGuide;
+}
+
+export interface GuideSousSection {
+  id: number;
+  section_id: number;
+  titre: string;
+  contenu: string | null;
+  image: string | null;
+  image_url: string | null;
+  ordre: number;
+  statut: StatutGuide;
+  documents: GuideDocument[];
+}
+
+export interface GuideSection {
+  id: number;
+  titre: string;
+  description: string | null;
+  categorie: string | null;
+  contenu: string | null;
+  image: string | null;
+  image_url: string | null;
+  icone: string | null;
+  icone_url: string | null;
+  ordre: number;
+  statut: StatutGuide;
+  sous_sections: GuideSousSection[];
+}
+
+export type StatutPartenaire = 'actif' | 'inactif';
+export type TypePartenaire = 'institution' | 'ong' | 'entreprise' | 'media' | 'universite' | 'association';
+export type NiveauPartenariat = 'or' | 'argent' | 'bronze' | 'institutionnel' | 'technique';
+
+export interface Partenaire {
+  id: number;
+  nom: string;
+  description: string | null;
+  logo: string | null;
+  logo_url: string | null;
+  site_web: string | null;
+  type: TypePartenaire | null;
+  type_label: string | null;
+  secteur_activite: string | null;
+  pays: string | null;
+  ville: string | null;
+  adresse: string | null;
+  email: string | null;
+  telephone: string | null;
+  date_debut_partenariat: string | null;
+  date_fin_partenariat: string | null;
+  niveau_partenariat: NiveauPartenariat | null;
+  niveau_label: string | null;
+  statut: StatutPartenaire;
+  created_at: string;
+  updated_at: string;
+}
+
+export type StatutAction = 'actif' | 'inactif' | 'a_venir' | 'termine';
+export type SectionAction = 'solidarite' | 'education' | 'culture' | 'communication';
+
+export interface Action {
+  id: number;
+  titre: string;
+  description: string;
+  section: SectionAction;
+  section_label: string;
+  image: string | null;
+  image_url: string | null;
+  date_debut: string | null;
+  date_fin: string | null;
+  date_evenement: string | null;
+  lieu: string | null;
+  objectifs: string[] | null;
+  activites_cles: string[] | null;
+  resultats: string[] | null;
+  statut: StatutAction;
+  statut_label: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export type StatutMembre = 'actif' | 'inactif';
 
 export interface Membre {
