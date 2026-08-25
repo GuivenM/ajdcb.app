@@ -27,7 +27,27 @@ export interface Adhesion {
   updated_at: string;
 }
 
-export type StatutMessage = 'non_lu' | 'lu' | 'repondu';
+export type StatutMembre = 'actif' | 'inactif';
+
+export interface Membre {
+  id: number;
+  nom: string;
+  prenom: string;
+  nom_complet: string;
+  photo: string | null;
+  photo_url: string | null;
+  facebook: string | null;
+  instagram: string | null;
+  linkedin: string | null;
+  twitter: string | null;
+  whatsapp: string | null;
+  poste: string | null;
+  commission: string | null;
+  role: string;
+  statut: StatutMembre;
+  created_at: string;
+  updated_at: string;
+}
 export type ObjetMessage =
   | 'question'
   | 'partenariat'

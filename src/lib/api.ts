@@ -89,4 +89,10 @@ export const api = {
       body: data !== undefined ? JSON.stringify(data) : undefined,
     }),
   delete: <T,>(path: string) => request<T>(path, { method: 'DELETE' }),
+  // Laravel ne parse pas le multipart en PUT natif : on POST avec un champ
+  // _method pour le "method spoofing", nécessaire dès qu'un fichier (photo) est envoyé.
+  postForm: <T,>(path: string, formData: FormData, method: 'POST' | 'PUT' = 'POST') => {
+    if (method === 'PUT') formData.append('_method', 'PUT');
+    return request<T>(path, { method: 'POST', body: formData });
+  },
 };

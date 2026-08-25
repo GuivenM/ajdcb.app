@@ -16,6 +16,7 @@ import { ProtectedRoute } from './admin/ProtectedRoute';
 import { Dashboard } from './admin/Dashboard';
 import { AdminAdhesions } from './admin/pages/AdminAdhesions';
 import { AdminMessages } from './admin/pages/AdminMessages';
+import { AdminMembres } from './admin/pages/AdminMembres';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -50,6 +51,7 @@ export default function App() {
               <Route index element={<Dashboard />} />
               <Route path="adhesions" element={<AdminAdhesions />} />
               <Route path="messages" element={<AdminMessages />} />
+              <Route path="membres" element={<AdminMembres />} />
             </Route>
           </Route>
         </Routes>
