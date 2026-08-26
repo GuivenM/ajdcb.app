@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
+import { Link } from 'react-router-dom';
 import { Calendar, ArrowUpRight, Loader2 } from 'lucide-react';
 import { api, ApiError } from '../../lib/api';
 
@@ -81,7 +82,11 @@ export function News() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className={`group relative rounded-3xl overflow-hidden cursor-pointer ${index === 0 ? 'md:col-span-2 md:row-span-2' : ''} bg-white`}
+              className={index === 0 ? 'md:col-span-2 md:row-span-2' : ''}
+            >
+            <Link
+              to={`/news/${item.id}`}
+              className={`group relative rounded-3xl overflow-hidden cursor-pointer block h-full bg-white`}
             >
               {item.image_url ? (
                 <img
@@ -112,6 +117,7 @@ export function News() {
                   )}
                 </div>
               </div>
+            </Link>
             </motion.div>
           ))}
         </div>
