@@ -53,7 +53,7 @@ export function Home() {
         {/* Background Image with Parallax-like fix */}
         <div className="absolute inset-0 z-0">
           <ImageWithFallback 
-            src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1920&auto=format&fit=crop"
+            src="/bg.jpeg"
             alt="Hero Background"
             className="w-full h-full object-cover scale-105"
           />
