@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Pencil, Trash2, MapPin, Users } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, MapPin, Users, Eye, Calendar, Clock, Ticket, Phone, Mail as MailIcon, User as UserIcon } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import type { Evenement, StatutEvenement } from '../types';
@@ -101,6 +101,7 @@ export function AdminEvenements() {
   const [evenements, setEvenements] = useState<Evenement[] | null>(null);
   const [filter, setFilter] = useState<FilterTab>('tous');
   const [editing, setEditing] = useState<Evenement | 'new' | null>(null);
+  const [viewing, setViewing] = useState<Evenement | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm());
   const [saving, setSaving] = useState(false);
 
@@ -272,7 +273,7 @@ export function AdminEvenements() {
             </TableHeader>
             <TableBody>
               {filtered.map((e) => (
-                <TableRow key={e.id}>
+                <TableRow key={e.id} className="cursor-pointer" onClick={() => setViewing(e)}>
                   <TableCell>
                     <div className="font-medium text-slate-900">{e.titre}</div>
                     {e.capacite_max ? (
@@ -299,8 +300,11 @@ export function AdminEvenements() {
                       {STATUT_LABELS[e.statut]}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right" onClick={(ev) => ev.stopPropagation()}>
                     <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => setViewing(e)}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
                       {canWrite && (
                         <Button variant="ghost" size="icon" onClick={() => openEdit(e)}>
                           <Pencil className="w-4 h-4" />
@@ -324,6 +328,97 @@ export function AdminEvenements() {
           </Table>
         </div>
       )}
+
+      <Dialog open={!!viewing} onOpenChange={(open) => !open && setViewing(null)}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          {viewing && (
+            <>
+              {viewing.image_url && (
+                <img
+                  src={viewing.image_url}
+                  alt={viewing.titre}
+                  className="w-full h-44 object-cover rounded-xl -mt-2"
+                />
+              )}
+              <DialogHeader>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <DialogTitle>{viewing.titre}</DialogTitle>
+                  <Badge variant="outline" className={STATUT_BADGE[viewing.statut]}>
+                    {STATUT_LABELS[viewing.statut]}
+                  </Badge>
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-4 text-sm">
+                {viewing.description && <p className="text-slate-600">{viewing.description}</p>}
+
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
+                  <InfoRow icon={Calendar} label="Période" value={periode(viewing)} />
+                  {(viewing.heure_debut || viewing.heure_fin) && (
+                    <InfoRow
+                      icon={Clock}
+                      label="Horaires"
+                      value={`${viewing.heure_debut || '?'} – ${viewing.heure_fin || '?'}`}
+                    />
+                  )}
+                  {viewing.lieu && <InfoRow icon={MapPin} label="Lieu" value={[viewing.lieu, viewing.ville].filter(Boolean).join(', ')} />}
+                  {viewing.adresse && <InfoRow label="Adresse" value={viewing.adresse} />}
+                  {viewing.capacite_max ? (
+                    <InfoRow
+                      icon={Users}
+                      label="Inscrits"
+                      value={`${viewing.nombre_inscrits} / ${viewing.capacite_max}`}
+                    />
+                  ) : null}
+                  {viewing.prix !== null && viewing.prix !== undefined && (
+                    <InfoRow
+                      icon={Ticket}
+                      label="Prix"
+                      value={viewing.prix > 0 ? `${viewing.prix} ${viewing.devise || 'FCFA'}` : 'Gratuit'}
+                    />
+                  )}
+                  {viewing.lien_billet && (
+                    <div className="col-span-2">
+                      <a
+                        href={viewing.lien_billet}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-brand-green-600 text-xs font-medium hover:underline"
+                      >
+                        Lien billetterie →
+                      </a>
+                    </div>
+                  )}
+                  {viewing.organisateur && <InfoRow icon={UserIcon} label="Organisateur" value={viewing.organisateur} />}
+                  {viewing.email_contact && <InfoRow icon={MailIcon} label="Email de contact" value={viewing.email_contact} />}
+                  {viewing.telephone_contact && <InfoRow icon={Phone} label="Téléphone" value={viewing.telephone_contact} />}
+                </dl>
+
+                {viewing.contenu && (
+                  <div className="pt-2 border-t border-slate-100">
+                    <p className="text-slate-400 text-xs mb-1">Détails</p>
+                    <p className="text-slate-700 whitespace-pre-wrap">{viewing.contenu}</p>
+                  </div>
+                )}
+              </div>
+
+              {canWrite && (
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setViewing(null);
+                      openEdit(viewing);
+                    }}
+                  >
+                    <Pencil className="w-4 h-4" /> Modifier
+                  </Button>
+                </DialogFooter>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
@@ -534,6 +629,26 @@ export function AdminEvenements() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function InfoRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon?: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div>
+      <p className="text-slate-400 text-xs flex items-center gap-1">
+        {Icon && <Icon className="w-3 h-3" />}
+        {label}
+      </p>
+      <p className="text-slate-700">{value}</p>
     </div>
   );
 }
