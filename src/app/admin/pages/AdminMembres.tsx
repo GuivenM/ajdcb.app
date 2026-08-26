@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Pencil, Trash2, UserX, UserCheck } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, UserX, UserCheck, Eye, MessageCircle, Facebook, Instagram, Linkedin, Twitter, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import type { Membre, StatutMembre } from '../types';
@@ -74,6 +74,7 @@ export function AdminMembres() {
   const [filter, setFilter] = useState<FilterTab>('tous');
 
   const [editing, setEditing] = useState<Membre | 'new' | null>(null);
+  const [viewing, setViewing] = useState<Membre | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
 
@@ -92,15 +93,48 @@ export function AdminMembres() {
     }
   }
 
+  const [search, setSearch] = useState('');
+  const [sortKey, setSortKey] = useState<'nom' | 'role' | 'statut'>('nom');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+
   useEffect(() => {
     load();
   }, []);
 
+  function toggleSort(key: 'nom' | 'role' | 'statut') {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  }
+
   const filtered = useMemo(() => {
     if (!membres) return [];
-    if (filter === 'tous') return membres;
-    return membres.filter((m) => m.statut === filter);
-  }, [membres, filter]);
+    let list = filter === 'tous' ? membres : membres.filter((m) => m.statut === filter);
+
+    const q = search.trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (m) =>
+          m.nom_complet.toLowerCase().includes(q) ||
+          (m.poste || '').toLowerCase().includes(q) ||
+          (m.commission || '').toLowerCase().includes(q) ||
+          (m.whatsapp || '').toLowerCase().includes(q)
+      );
+    }
+
+    const sorted = [...list].sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === 'nom') cmp = a.nom_complet.localeCompare(b.nom_complet);
+      else if (sortKey === 'role') cmp = a.role.localeCompare(b.role);
+      else cmp = a.statut.localeCompare(b.statut);
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+
+    return sorted;
+  }, [membres, filter, search, sortKey, sortDir]);
 
   function openCreate() {
     setForm(EMPTY_FORM);
@@ -203,13 +237,25 @@ export function AdminMembres() {
         )}
       </div>
 
-      <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterTab)} className="mb-5">
-        <TabsList>
-          <TabsTrigger value="tous">Tous</TabsTrigger>
-          <TabsTrigger value="actif">Actifs</TabsTrigger>
-          <TabsTrigger value="inactif">Inactifs</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+        <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterTab)}>
+          <TabsList>
+            <TabsTrigger value="tous">Tous</TabsTrigger>
+            <TabsTrigger value="actif">Actifs</TabsTrigger>
+            <TabsTrigger value="inactif">Inactifs</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <div className="relative sm:w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un membre…"
+            className="pl-9"
+          />
+        </div>
+      </div>
 
       {membres === null ? (
         <div className="flex items-center gap-2 text-slate-500 text-sm">
@@ -224,15 +270,21 @@ export function AdminMembres() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Membre</TableHead>
-                <TableHead className="hidden md:table-cell">Rôle</TableHead>
-                <TableHead>Statut</TableHead>
+                <TableHead>
+                  <SortableHeader label="Membre" active={sortKey === 'nom'} dir={sortDir} onClick={() => toggleSort('nom')} />
+                </TableHead>
+                <TableHead className="hidden md:table-cell">
+                  <SortableHeader label="Rôle" active={sortKey === 'role'} dir={sortDir} onClick={() => toggleSort('role')} />
+                </TableHead>
+                <TableHead>
+                  <SortableHeader label="Statut" active={sortKey === 'statut'} dir={sortDir} onClick={() => toggleSort('statut')} />
+                </TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((m) => (
-                <TableRow key={m.id}>
+                <TableRow key={m.id} className="cursor-pointer" onClick={() => setViewing(m)}>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="w-8 h-8">
@@ -258,8 +310,11 @@ export function AdminMembres() {
                       {m.statut === 'actif' ? 'Actif' : 'Inactif'}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => setViewing(m)}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
                       {canWrite && (
                         <>
                           <Button variant="ghost" size="icon" onClick={() => openEdit(m)}>
@@ -292,6 +347,115 @@ export function AdminMembres() {
           </Table>
         </div>
       )}
+
+      <Dialog open={!!viewing} onOpenChange={(open) => !open && setViewing(null)}>
+        <DialogContent className="max-w-md">
+          {viewing && (
+            <>
+              <DialogHeader>
+                <div className="flex flex-col items-center text-center gap-3 pt-2">
+                  <Avatar className="w-24 h-24">
+                    {viewing.photo_url && <AvatarImage src={viewing.photo_url} alt={viewing.nom_complet} />}
+                    <AvatarFallback className="text-2xl bg-brand-green-50 text-brand-green-700">
+                      {viewing.prenom[0]}
+                      {viewing.nom[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <DialogTitle className="text-lg">{viewing.nom_complet}</DialogTitle>
+                    <p className="text-sm text-slate-500 mt-0.5">{viewing.role}</p>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className={
+                      viewing.statut === 'actif'
+                        ? 'bg-brand-green-50 text-brand-green-600 border-brand-green-200'
+                        : 'bg-slate-100 text-slate-500 border-slate-200'
+                    }
+                  >
+                    {viewing.statut === 'actif' ? 'Actif' : 'Inactif'}
+                  </Badge>
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                {(viewing.poste || viewing.commission) && (
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    {viewing.poste && (
+                      <div>
+                        <p className="text-slate-400 text-xs">Poste au bureau</p>
+                        <p className="text-slate-700">{viewing.poste}</p>
+                      </div>
+                    )}
+                    {viewing.commission && (
+                      <div>
+                        <p className="text-slate-400 text-xs">Commission</p>
+                        <p className="text-slate-700">{viewing.commission}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {(viewing.whatsapp || viewing.facebook || viewing.instagram || viewing.linkedin || viewing.twitter) && (
+                  <div>
+                    <p className="text-slate-400 text-xs mb-2">Contact & réseaux</p>
+                    <div className="flex flex-wrap gap-2">
+                      {viewing.whatsapp && (
+                        <a
+                          href={`https://wa.me/${viewing.whatsapp.replace(/[^0-9]/g, '')}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-1.5 text-xs bg-slate-50 hover:bg-slate-100 rounded-lg px-2.5 py-1.5 text-slate-600"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" /> {viewing.whatsapp}
+                        </a>
+                      )}
+                      {viewing.facebook && (
+                        <a href={viewing.facebook} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs bg-slate-50 hover:bg-slate-100 rounded-lg px-2.5 py-1.5 text-slate-600">
+                          <Facebook className="w-3.5 h-3.5" /> Facebook
+                        </a>
+                      )}
+                      {viewing.instagram && (
+                        <a href={viewing.instagram} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs bg-slate-50 hover:bg-slate-100 rounded-lg px-2.5 py-1.5 text-slate-600">
+                          <Instagram className="w-3.5 h-3.5" /> Instagram
+                        </a>
+                      )}
+                      {viewing.linkedin && (
+                        <a href={viewing.linkedin} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs bg-slate-50 hover:bg-slate-100 rounded-lg px-2.5 py-1.5 text-slate-600">
+                          <Linkedin className="w-3.5 h-3.5" /> LinkedIn
+                        </a>
+                      )}
+                      {viewing.twitter && (
+                        <a href={viewing.twitter} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs bg-slate-50 hover:bg-slate-100 rounded-lg px-2.5 py-1.5 text-slate-600">
+                          <Twitter className="w-3.5 h-3.5" /> X / Twitter
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-xs text-slate-400 text-center pt-2 border-t border-slate-100">
+                  Membre depuis le {new Date(viewing.created_at).toLocaleDateString('fr-FR')}
+                </p>
+              </div>
+
+              {canWrite && (
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setViewing(null);
+                      openEdit(viewing);
+                    }}
+                  >
+                    <Pencil className="w-4 h-4" /> Modifier
+                  </Button>
+                </DialogFooter>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
@@ -433,5 +597,28 @@ export function AdminMembres() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function SortableHeader({
+  label,
+  active,
+  dir,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  dir: 'asc' | 'desc';
+  onClick: () => void;
+}) {
+  return (
+    <button onClick={onClick} className="flex items-center gap-1 hover:text-slate-900">
+      {label}
+      {active ? (
+        dir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+      ) : (
+        <ArrowUpDown className="w-3 h-3 text-slate-300" />
+      )}
+    </button>
   );
 }
