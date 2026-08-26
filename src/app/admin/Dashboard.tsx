@@ -1,42 +1,124 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { UserPlus, Mail, Loader2, ArrowRight } from 'lucide-react';
+import {
+  UserPlus,
+  Mail,
+  Users,
+  Wallet,
+  CalendarDays,
+  Newspaper,
+  BookOpen,
+  Handshake,
+  Activity,
+  Loader2,
+  ArrowRight,
+} from 'lucide-react';
 import { api } from '../../lib/api';
 import { useAuth } from '../context/AuthContext';
-import type { Adhesion, Message } from './types';
+import type {
+  Adhesion,
+  Message,
+  Membre,
+  CotisationStats,
+  Evenement,
+  Actualite,
+  GuideSection,
+  Partenaire,
+  Action,
+} from './types';
+
+interface Overview {
+  adhesionsEnAttente: number;
+  adhesionsTotal: number;
+  messagesNonLus: number;
+  messagesTotal: number;
+  membresActifs: number;
+  membresTotal: number;
+  cotisationsEnRetard: number;
+  cotisationsTauxAJour: number;
+  evenementsAVenir: number;
+  evenementsTotal: number;
+  actualitesBrouillons: number;
+  actualitesTotal: number;
+  guideDocuments: number;
+  guideSections: number;
+  partenairesActifs: number;
+  partenairesTotal: number;
+  actionsEnCours: number;
+  actionsTotal: number;
+}
 
 export function Dashboard() {
   const { user } = useAuth();
-  const [adhesions, setAdhesions] = useState<Adhesion[] | null>(null);
-  const [messages, setMessages] = useState<Message[] | null>(null);
+  const [data, setData] = useState<Overview | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    const moisCourant = new Date().toISOString().slice(0, 7);
+
     (async () => {
       try {
-        const [a, m] = await Promise.all([
+        const [
+          adhesions,
+          messages,
+          membres,
+          cotisationsStats,
+          evenements,
+          actualites,
+          guide,
+          partenairesActifs,
+          partenairesInactifs,
+          actions,
+        ] = await Promise.all([
           api.get<Adhesion[]>('/v1/adhesions'),
           api.get<Message[]>('/v1/messages'),
+          api.get<Membre[]>('/v1/membres-admin/tous'),
+          api.get<CotisationStats>(`/v1/cotisations/statistiques?mois=${moisCourant}`),
+          api.get<Evenement[]>('/v1/evenements'),
+          api.get<Actualite[]>('/v1/actualites'),
+          api.get<GuideSection[]>('/v1/guide?all=1'),
+          api.get<Partenaire[]>('/v1/partenaires?statut=actif'),
+          api.get<Partenaire[]>('/v1/partenaires?statut=inactif'),
+          api.get<Action[]>('/v1/actions'),
         ]);
-        if (!cancelled) {
-          setAdhesions(a);
-          setMessages(m);
-        }
+
+        if (cancelled) return;
+
+        const today = new Date().toISOString().slice(0, 10);
+
+        setData({
+          adhesionsEnAttente: adhesions.filter((a) => a.statut === 'en_attente').length,
+          adhesionsTotal: adhesions.length,
+          messagesNonLus: messages.filter((m) => m.statut === 'non_lu').length,
+          messagesTotal: messages.length,
+          membresActifs: membres.filter((m) => m.statut === 'actif').length,
+          membresTotal: membres.length,
+          cotisationsEnRetard: cotisationsStats.nb_impayees,
+          cotisationsTauxAJour: cotisationsStats.taux_a_jour,
+          evenementsAVenir: evenements.filter((e) => e.date_debut >= today && e.statut === 'publie').length,
+          evenementsTotal: evenements.length,
+          actualitesBrouillons: actualites.filter((a) => a.statut === 'brouillon').length,
+          actualitesTotal: actualites.length,
+          guideDocuments: guide.reduce(
+            (sum, s) => sum + s.sous_sections.reduce((s2, ss) => s2 + ss.documents.length, 0),
+            0
+          ),
+          guideSections: guide.length,
+          partenairesActifs: partenairesActifs.length,
+          partenairesTotal: partenairesActifs.length + partenairesInactifs.length,
+          actionsEnCours: actions.filter((a) => a.statut === 'actif').length,
+          actionsTotal: actions.length,
+        });
       } catch {
-        if (!cancelled) setError("Impossible de charger les données du tableau de bord.");
+        if (!cancelled) setError('Impossible de charger les données du tableau de bord.');
       }
     })();
+
     return () => {
       cancelled = true;
     };
   }, []);
-
-  const loading = adhesions === null || messages === null;
-  const enAttente = adhesions?.filter((a) => a.statut === 'en_attente').length ?? 0;
-  const approuvees = adhesions?.filter((a) => a.statut === 'approuvee').length ?? 0;
-  const nonLus = messages?.filter((m) => m.statut === 'non_lu').length ?? 0;
-  const repondus = messages?.filter((m) => m.statut === 'repondu').length ?? 0;
 
   return (
     <div>
@@ -56,57 +138,100 @@ export function Dashboard() {
         </div>
       )}
 
-      {loading ? (
+      {!data ? (
         <div className="flex items-center gap-2 text-slate-500 text-sm">
           <Loader2 className="w-4 h-4 animate-spin" /> Chargement…
         </div>
       ) : (
         <>
-          {/* Cartes KPI — grille aérée, une carte par indicateur */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-3.5">
+          {/* À traiter en priorité */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
             <StatCard
               label="Adhésions en attente"
-              value={enAttente}
+              value={data.adhesionsEnAttente}
               icon={UserPlus}
-              tone={enAttente > 0 ? 'gold' : 'green'}
+              tone={data.adhesionsEnAttente > 0 ? 'gold' : 'green'}
             />
-            <StatCard label="Adhésions approuvées" value={approuvees} icon={UserPlus} tone="green" />
             <StatCard
               label="Messages non lus"
-              value={nonLus}
+              value={data.messagesNonLus}
               icon={Mail}
-              tone={nonLus > 0 ? 'red' : 'green'}
+              tone={data.messagesNonLus > 0 ? 'red' : 'green'}
             />
-            <StatCard label="Messages répondus" value={repondus} icon={Mail} tone="green" />
+            <StatCard
+              label="Cotisations en retard"
+              value={data.cotisationsEnRetard}
+              icon={Wallet}
+              tone={data.cotisationsEnRetard > 0 ? 'red' : 'green'}
+            />
+            <StatCard
+              label="Événements à venir"
+              value={data.evenementsAVenir}
+              icon={CalendarDays}
+              tone="green"
+            />
           </div>
 
-          {/* Accès rapides — deux cartes côte à côte, même esprit que les cartes KPI */}
-          <div className="grid md:grid-cols-2 gap-3.5">
-            <QuickLinkCard
+          {/* Tous les modules */}
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">
+            Modules
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            <ModuleCard
               to="/admin/adhesions"
-              title="Demandes d'adhésion"
-              description={
-                enAttente > 0
-                  ? `${enAttente} demande${enAttente > 1 ? 's' : ''} en attente de traitement.`
-                  : "Aucune demande en attente pour l'instant."
-              }
-              cta="Traiter les demandes"
+              icon={UserPlus}
+              title="Adhésions"
+              stat={`${data.adhesionsTotal} demande${data.adhesionsTotal > 1 ? 's' : ''} au total`}
             />
-            <QuickLinkCard
+            <ModuleCard
               to="/admin/messages"
+              icon={Mail}
               title="Messages"
-              description={
-                nonLus > 0
-                  ? `${nonLus} message${nonLus > 1 ? 's' : ''} non lu${nonLus > 1 ? 's' : ''}.`
-                  : 'Boîte de réception à jour.'
-              }
-              cta="Voir la boîte de réception"
+              stat={`${data.messagesTotal} message${data.messagesTotal > 1 ? 's' : ''} reçu${data.messagesTotal > 1 ? 's' : ''}`}
+            />
+            <ModuleCard
+              to="/admin/membres"
+              icon={Users}
+              title="Membres"
+              stat={`${data.membresActifs} actif${data.membresActifs > 1 ? 's' : ''} / ${data.membresTotal}`}
+            />
+            <ModuleCard
+              to="/admin/cotisations"
+              icon={Wallet}
+              title="Cotisations"
+              stat={`${data.cotisationsTauxAJour}% à jour ce mois`}
+            />
+            <ModuleCard
+              to="/admin/evenements"
+              icon={CalendarDays}
+              title="Événements"
+              stat={`${data.evenementsTotal} événement${data.evenementsTotal > 1 ? 's' : ''} au total`}
+            />
+            <ModuleCard
+              to="/admin/actualites"
+              icon={Newspaper}
+              title="Actualités"
+              stat={`${data.actualitesBrouillons} brouillon${data.actualitesBrouillons > 1 ? 's' : ''} en attente`}
+            />
+            <ModuleCard
+              to="/admin/guide"
+              icon={BookOpen}
+              title="Guide"
+              stat={`${data.guideSections} section${data.guideSections > 1 ? 's' : ''} · ${data.guideDocuments} document${data.guideDocuments > 1 ? 's' : ''}`}
+            />
+            <ModuleCard
+              to="/admin/partenaires"
+              icon={Handshake}
+              title="Partenaires"
+              stat={`${data.partenairesActifs} actif${data.partenairesActifs > 1 ? 's' : ''} / ${data.partenairesTotal}`}
+            />
+            <ModuleCard
+              to="/admin/actions"
+              icon={Activity}
+              title="Actions"
+              stat={`${data.actionsEnCours} en cours / ${data.actionsTotal}`}
             />
           </div>
-
-          <p className="text-sm text-slate-400 mt-6">
-            Tous les modules prévus pour cette V1 sont maintenant en place.
-          </p>
         </>
       )}
     </div>
@@ -141,28 +266,32 @@ function StatCard({
   );
 }
 
-function QuickLinkCard({
+function ModuleCard({
   to,
+  icon: Icon,
   title,
-  description,
-  cta,
+  stat,
 }: {
   to: string;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
-  description: string;
-  cta: string;
+  stat: string;
 }) {
   return (
     <Link
       to={to}
-      className="bg-white border border-brand-green-100 rounded-xl p-5 hover:border-brand-green-300 transition-colors group"
+      className="bg-white border border-brand-green-100 rounded-xl p-5 hover:border-brand-green-300 transition-colors group flex items-start justify-between gap-3"
     >
-      <h2 className="text-sm font-semibold text-slate-900 mb-1">{title}</h2>
-      <p className="text-sm text-slate-500 mb-4">{description}</p>
-      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-green-600">
-        {cta}
-        <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-      </span>
+      <div className="flex items-start gap-3">
+        <div className="w-8 h-8 rounded-md bg-brand-green-50 flex items-center justify-center shrink-0">
+          <Icon className="w-4 h-4 text-brand-green-600" />
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+          <p className="text-xs text-slate-500 mt-0.5">{stat}</p>
+        </div>
+      </div>
+      <ArrowRight className="w-3.5 h-3.5 text-slate-300 shrink-0 mt-1.5 transition-transform group-hover:translate-x-0.5 group-hover:text-brand-green-600" />
     </Link>
   );
 }

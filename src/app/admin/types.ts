@@ -2,22 +2,75 @@ export type StatutAdhesion = 'en_attente' | 'approuvee' | 'rejetee';
 
 export interface Adhesion {
   id: number;
+  // Nationalité & pièces
+  nationalite: string;
+  est_congolais: boolean;
+  possede_carte_consulaire: boolean | null;
+  carte_consulaire_fichier: string | null;
+  carte_consulaire_fichier_url: string | null;
+  duree_au_benin: string | null;
+  possede_cipr: boolean | null;
+  cipr_fichier: string | null;
+  cipr_fichier_url: string | null;
+  // Identité & état civil
   nom: string;
   prenom: string;
+  nom_marital: string | null;
+  sexe: 'masculin' | 'feminin' | null;
   date_naissance: string;
   lieu_naissance: string;
-  nationalite: string;
-  email: string;
-  telephone: string;
   adresse: string;
   ville: string;
+  situation_matrimoniale: 'marie' | 'divorce' | 'union_libre' | 'celibataire' | 'veuf' | null;
+  nombre_enfants_charge: number | null;
+  photo: string | null;
+  photo_url: string | null;
+  // Coordonnées
+  email: string;
+  telephone: string;
+  autre_telephone: string | null;
+  // Statut professionnel
   profession: string;
+  profession_autre: string | null;
   niveau_etude: string;
+  niveau_etude_autre: string | null;
+  dernier_diplome: string | null;
+  dernier_diplome_autre: string | null;
+  // Entrepreneur
+  entrepreneur_domaine: string | null;
+  entrepreneur_domaine_autre: string | null;
+  entrepreneur_duree: string | null;
+  entrepreneur_nom_entreprise: string | null;
+  entrepreneur_fonction: string | null;
+  // Étudiant
   etablissement: string | null;
-  motivation: string;
+  etudiant_filiere: string | null;
+  etudiant_annee: string | null;
+  // Compétences, intérêts, langues
   competences: string[] | null;
+  competences_autre: string | null;
   centres_interet: string[] | null;
+  domaines_interet_autre: string | null;
+  loisirs: string[] | null;
+  loisirs_autre: string | null;
   disponibilite: string | null;
+  langues: string[] | null;
+  // Engagement associatif
+  comment_connu: string | null;
+  comment_connu_autre: string | null;
+  recommande_par: string | null;
+  motivation: string | null;
+  experience_associative: boolean | null;
+  experience_associative_details: string | null;
+  commissions_souhaitees: string[] | null;
+  attentes: string | null;
+  // Déclaration
+  declarant_nom_complet: string | null;
+  accepte_conditions: boolean;
+  souhaite_recevoir_actualites: boolean | null;
+  lettre_demande_fichiers: string[] | null;
+  lettre_demande_fichiers_urls: string[] | null;
+  // Divers / traitement
   commentaire: string | null;
   statut: StatutAdhesion;
   date_traitement: string | null;

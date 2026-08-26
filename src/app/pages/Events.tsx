@@ -12,7 +12,7 @@ export function Events() {
 
   useEffect(() => {
     api
-      .get<Evenement[]>('/evenements?a_venir=1')
+      .get<Evenement[]>('/v1/evenements?a_venir=1')
       .then(setEvenements)
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Erreur de chargement'))
       .finally(() => setLoading(false));
@@ -92,7 +92,7 @@ export function Events() {
                       <span className="text-sm font-semibold text-red-500">Événement complet</span>
                     ) : payant ? (
                       <FedaPayButton
-                        endpoint={`/paiements/evenements/${evt.id}`}
+                        endpoint={`/v1/paiements/evenements/${evt.id}`}
                         montant={evt.prix as number}
                         devise={evt.devise || 'XOF'}
                         label="Réserver ma place"

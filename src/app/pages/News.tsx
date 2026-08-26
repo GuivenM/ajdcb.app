@@ -29,7 +29,7 @@ export function News() {
 
   useEffect(() => {
     api
-      .get<Actualite[]>('/actualites')
+      .get<Actualite[]>('/v1/actualites')
       .then(setActualites)
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Erreur de chargement'))
       .finally(() => setLoading(false));

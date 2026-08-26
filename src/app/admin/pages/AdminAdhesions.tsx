@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Check, X, Trash2, Eye } from 'lucide-react';
+import { Loader2, Check, X, Trash2, Eye, FileText, Download } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import type { Adhesion, StatutAdhesion } from '../types';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import {
   Table,
@@ -37,6 +38,22 @@ const STATUT_BADGE: Record<StatutAdhesion, string> = {
   rejetee: 'bg-brand-red-50 text-brand-red-600 border-brand-red-200',
 };
 
+const PROFESSION_LABELS: Record<string, string> = {
+  etudiant: 'Étudiant(e)',
+  employe: 'Employé(e)',
+  entrepreneur: 'Entrepreneur(e)',
+  commercant: 'Commerçant(e)',
+  sans_emploi: 'Sans emploi',
+  autre: 'Autre',
+};
+
+const SEXE_LABELS: Record<string, string> = { masculin: 'Masculin', feminin: 'Féminin' };
+
+const SITUATION_LABELS: Record<string, string> = {
+  marie: 'Marié(e)', divorce: 'Divorcé(e)', union_libre: 'Union libre',
+  celibataire: 'Célibataire', veuf: 'Veuf(ve)',
+};
+
 type FilterTab = 'tous' | StatutAdhesion;
 
 export function AdminAdhesions() {
@@ -55,7 +72,7 @@ export function AdminAdhesions() {
       const data = await api.get<Adhesion[]>('/v1/adhesions');
       setAdhesions(data);
     } catch {
-      toast.error('Impossible de charger les demandes d\'adhésion.');
+      toast.error("Impossible de charger les demandes d'adhésion.");
     }
   }
 
@@ -83,10 +100,8 @@ export function AdminAdhesions() {
         commentaire: commentaire || undefined,
       });
       setAdhesions((prev) => prev?.map((a) => (a.id === updated.id ? updated : a)) ?? null);
-      toast.success(
-        statut === 'approuvee' ? 'Demande approuvée avec succès.' : 'Demande rejetée avec succès.'
-      );
-      setSelected(null);
+      toast.success(statut === 'approuvee' ? 'Demande approuvée avec succès.' : 'Demande rejetée avec succès.');
+      setSelected(updated);
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Une erreur est survenue.');
     } finally {
@@ -110,8 +125,8 @@ export function AdminAdhesions() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Demandes d'adhésion</h1>
-          <p className="text-slate-500 text-sm">Examinez et traitez les candidatures reçues.</p>
+          <h1 className="text-xl font-bold text-slate-900">Demandes d'adhésion</h1>
+          <p className="text-slate-500 text-sm mt-0.5">Examinez et traitez les candidatures reçues.</p>
         </div>
       </div>
 
@@ -125,7 +140,7 @@ export function AdminAdhesions() {
       </Tabs>
 
       {adhesions === null ? (
-        <div className="flex items-center gap-2 text-slate-500">
+        <div className="flex items-center gap-2 text-slate-500 text-sm">
           <Loader2 className="w-4 h-4 animate-spin" /> Chargement…
         </div>
       ) : filtered.length === 0 ? (
@@ -146,23 +161,31 @@ export function AdminAdhesions() {
             </TableHeader>
             <TableBody>
               {filtered.map((a) => (
-                <TableRow key={a.id}>
+                <TableRow key={a.id} className="cursor-pointer" onClick={() => openDetail(a)}>
                   <TableCell>
-                    <div className="font-medium text-slate-900">
-                      {a.prenom} {a.nom}
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-8 h-8">
+                        {a.photo_url && <AvatarImage src={a.photo_url} alt={a.nom} />}
+                        <AvatarFallback className="text-xs bg-brand-green-50 text-brand-green-700">
+                          {a.prenom[0]}{a.nom[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium text-slate-900">{a.prenom} {a.nom}</div>
+                        <div className="text-xs text-slate-400">{a.email}</div>
+                      </div>
                     </div>
-                    <div className="text-xs text-slate-400">{a.email}</div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-slate-600">{a.ville}</TableCell>
                   <TableCell className="hidden md:table-cell text-slate-600">
-                    {a.profession}
+                    {PROFESSION_LABELS[a.profession] || a.profession}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={STATUT_BADGE[a.statut]}>
                       {STATUT_LABELS[a.statut]}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex justify-end gap-1">
                       <Button variant="ghost" size="icon" onClick={() => openDetail(a)}>
                         <Eye className="w-4 h-4" />
@@ -187,37 +210,117 @@ export function AdminAdhesions() {
       )}
 
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[88vh] overflow-y-auto">
           {selected && (
             <>
               <DialogHeader>
-                <DialogTitle>
-                  {selected.prenom} {selected.nom}
-                </DialogTitle>
+                <div className="flex items-center gap-3">
+                  <Avatar className="w-14 h-14">
+                    {selected.photo_url && <AvatarImage src={selected.photo_url} alt={selected.nom} />}
+                    <AvatarFallback className="bg-brand-green-50 text-brand-green-700">
+                      {selected.prenom[0]}{selected.nom[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <DialogTitle>{selected.prenom} {selected.nom}</DialogTitle>
+                    <Badge variant="outline" className={`${STATUT_BADGE[selected.statut]} mt-1`}>
+                      {STATUT_LABELS[selected.statut]}
+                    </Badge>
+                  </div>
+                </div>
               </DialogHeader>
 
-              <div className="space-y-3 text-sm">
-                <Badge variant="outline" className={STATUT_BADGE[selected.statut]}>
-                  {STATUT_LABELS[selected.statut]}
-                </Badge>
+              <div className="space-y-6 text-sm">
+                <Section title="Nationalité & pièces">
+                  <Info label="Nationalité" value={selected.nationalite} />
+                  <Info label="Congolais(e)" value={selected.est_congolais ? 'Oui' : 'Non'} />
+                  <Info label="Depuis au Bénin" value={selected.duree_au_benin} />
+                  <Info label="Carte consulaire" value={selected.possede_carte_consulaire ? 'Oui' : 'Non'} />
+                  <Info label="CIPR" value={selected.possede_cipr ? 'Oui' : 'Non'} />
+                  <DocLinks
+                    docs={[
+                      { label: 'Carte consulaire', url: selected.carte_consulaire_fichier_url },
+                      { label: 'CIPR', url: selected.cipr_fichier_url },
+                    ]}
+                  />
+                </Section>
 
-                <dl className="grid grid-cols-2 gap-x-4 gap-y-2 mt-3">
+                <Section title="État civil">
+                  <Info label="Sexe" value={selected.sexe ? SEXE_LABELS[selected.sexe] : null} />
+                  <Info label="Date de naissance" value={new Date(selected.date_naissance).toLocaleDateString('fr-FR')} />
+                  <Info label="Lieu de naissance" value={selected.lieu_naissance} />
+                  <Info label="Nom marital" value={selected.nom_marital} />
+                  <Info
+                    label="Situation matrimoniale"
+                    value={selected.situation_matrimoniale ? SITUATION_LABELS[selected.situation_matrimoniale] : null}
+                  />
+                  <Info label="Enfants à charge" value={selected.nombre_enfants_charge?.toString()} />
+                  <Info label="Lieu de résidence" value={selected.adresse} />
+                  <Info label="Ville" value={selected.ville} />
+                </Section>
+
+                <Section title="Statut professionnel">
+                  <Info
+                    label="Profession"
+                    value={selected.profession === 'autre' ? selected.profession_autre : PROFESSION_LABELS[selected.profession]}
+                  />
+                  <Info label="Niveau d'études" value={selected.niveau_etude_autre || selected.niveau_etude} />
+                  <Info label="Dernier diplôme" value={selected.dernier_diplome_autre || selected.dernier_diplome} />
+                  {selected.profession === 'entrepreneur' && (
+                    <>
+                      <Info label="Domaine d'activité" value={selected.entrepreneur_domaine_autre || selected.entrepreneur_domaine} />
+                      <Info label="Depuis" value={selected.entrepreneur_duree} />
+                      <Info label="Entreprise" value={selected.entrepreneur_nom_entreprise} />
+                      <Info label="Fonction" value={selected.entrepreneur_fonction} />
+                    </>
+                  )}
+                  {selected.profession === 'etudiant' && (
+                    <>
+                      <Info label="Établissement" value={selected.etablissement} />
+                      <Info label="Filière" value={selected.etudiant_filiere} />
+                      <Info label="Année" value={selected.etudiant_annee} />
+                    </>
+                  )}
+                </Section>
+
+                <Section title="Compétences, intérêts & langues">
+                  <TagList label="Compétences" values={selected.competences} autre={selected.competences_autre} />
+                  <TagList label="Domaines d'intérêt" values={selected.centres_interet} autre={selected.domaines_interet_autre} />
+                  <TagList label="Loisirs" values={selected.loisirs} autre={selected.loisirs_autre} />
+                  <Info label="Disponibilité" value={selected.disponibilite} full />
+                  <TagList label="Langues" values={selected.langues} />
+                </Section>
+
+                <Section title="Engagement associatif">
+                  <Info label="Connu via" value={selected.comment_connu_autre || selected.comment_connu} />
+                  <Info label="Recommandé par" value={selected.recommande_par} />
+                  <Info label="Expérience associative" value={selected.experience_associative ? 'Oui' : 'Non'} />
+                  {selected.experience_associative_details && (
+                    <Info label="Détails" value={selected.experience_associative_details} full />
+                  )}
+                  <TagList label="Commissions souhaitées" values={selected.commissions_souhaitees} />
+                  {selected.motivation && <Info label="Motivation" value={selected.motivation} full />}
+                  {selected.attentes && <Info label="Attentes" value={selected.attentes} full />}
+                </Section>
+
+                <Section title="Coordonnées">
                   <Info label="Email" value={selected.email} />
                   <Info label="Téléphone" value={selected.telephone} />
-                  <Info label="Ville" value={selected.ville} />
-                  <Info label="Nationalité" value={selected.nationalite} />
-                  <Info label="Profession" value={selected.profession} />
-                  <Info label="Niveau d'étude" value={selected.niveau_etude} />
-                  {selected.etablissement && (
-                    <Info label="Établissement" value={selected.etablissement} />
-                  )}
-                  <Info label="Adresse" value={selected.adresse} />
-                </dl>
+                  <Info label="Autre téléphone" value={selected.autre_telephone} />
+                  <Info label="Reçoit les actualités" value={selected.souhaite_recevoir_actualites ? 'Oui' : 'Non'} />
+                </Section>
 
-                <div>
-                  <p className="text-slate-400 text-xs mb-1">Motivation</p>
-                  <p className="text-slate-700 whitespace-pre-wrap">{selected.motivation}</p>
-                </div>
+                {(selected.declarant_nom_complet || (selected.lettre_demande_fichiers_urls?.length ?? 0) > 0) && (
+                  <Section title="Déclaration">
+                    <Info label="Déclarant" value={selected.declarant_nom_complet} />
+                    <DocLinks
+                      docs={(selected.lettre_demande_fichiers_urls || []).map((url, i) => ({
+                        label: `Lettre au Président (${i + 1})`,
+                        url,
+                      }))}
+                    />
+                  </Section>
+                )}
 
                 {selected.statut === 'en_attente' && canTraiter && (
                   <div className="pt-2">
@@ -269,11 +372,58 @@ export function AdminAdhesions() {
   );
 }
 
-function Info({ label, value }: { label: string; value: string }) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2.5">{title}</h3>
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5">{children}</dl>
+    </div>
+  );
+}
+
+function Info({ label, value, full = false }: { label: string; value?: string | null; full?: boolean }) {
+  if (!value) return null;
+  return (
+    <div className={full ? 'col-span-2' : undefined}>
       <p className="text-slate-400 text-xs">{label}</p>
-      <p className="text-slate-700">{value}</p>
+      <p className="text-slate-700 whitespace-pre-wrap">{value}</p>
+    </div>
+  );
+}
+
+function TagList({ label, values, autre }: { label: string; values?: string[] | null; autre?: string | null }) {
+  const all = [...(values || []), ...(autre ? [autre] : [])];
+  if (all.length === 0) return null;
+  return (
+    <div className="col-span-2">
+      <p className="text-slate-400 text-xs mb-1.5">{label}</p>
+      <div className="flex flex-wrap gap-1.5">
+        {all.map((v, i) => (
+          <Badge key={i} variant="secondary" className="font-normal">{v}</Badge>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DocLinks({ docs }: { docs: { label: string; url: string | null }[] }) {
+  const available = docs.filter((d) => d.url);
+  if (available.length === 0) return null;
+  return (
+    <div className="col-span-2 flex flex-wrap gap-2 pt-1">
+      {available.map((d) => (
+        <a
+          key={d.label}
+          href={d.url!}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-1.5 text-xs bg-slate-50 hover:bg-slate-100 rounded-lg px-2.5 py-1.5 text-slate-600"
+        >
+          <FileText className="w-3.5 h-3.5 text-slate-400" />
+          {d.label}
+          <Download className="w-3 h-3 text-slate-300" />
+        </a>
+      ))}
     </div>
   );
 }

@@ -23,7 +23,7 @@ export function Contact() {
   const onSubmit = async (data: ContactForm) => {
     setLoading(true);
     try {
-      await api.post('/messages', data);
+      await api.post('/v1/messages', data);
       toast.success('Message envoyé ! Vous recevrez une confirmation par email.');
       reset({ objet: 'question' });
     } catch (err) {
