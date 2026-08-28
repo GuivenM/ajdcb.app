@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Pencil, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, Eye, Calendar, MapPin, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import type { Actualite, StatutActualite, TypeActualite } from '../types';
@@ -85,8 +85,12 @@ export function AdminActualites() {
   const [actualites, setActualites] = useState<Actualite[] | null>(null);
   const [filter, setFilter] = useState<FilterTab>('tous');
   const [editing, setEditing] = useState<Actualite | 'new' | null>(null);
+  const [viewing, setViewing] = useState<Actualite | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm());
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
+  const [sortKey, setSortKey] = useState<'titre' | 'type' | 'created_at' | 'statut'>('created_at');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   async function load() {
     try {
@@ -101,11 +105,40 @@ export function AdminActualites() {
     load();
   }, []);
 
+  function toggleSort(key: 'titre' | 'type' | 'created_at' | 'statut') {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  }
+
   const filtered = useMemo(() => {
     if (!actualites) return [];
-    if (filter === 'tous') return actualites;
-    return actualites.filter((a) => a.statut === filter);
-  }, [actualites, filter]);
+    let list = filter === 'tous' ? actualites : actualites.filter((a) => a.statut === filter);
+
+    const q = search.trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (a) =>
+          a.titre.toLowerCase().includes(q) ||
+          a.description.toLowerCase().includes(q) ||
+          a.auteur.toLowerCase().includes(q)
+      );
+    }
+
+    const sorted = [...list].sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === 'titre') cmp = a.titre.localeCompare(b.titre);
+      else if (sortKey === 'type') cmp = a.type.localeCompare(b.type);
+      else if (sortKey === 'statut') cmp = a.statut.localeCompare(b.statut);
+      else cmp = a.created_at.localeCompare(b.created_at);
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+
+    return sorted;
+  }, [actualites, filter, search, sortKey, sortDir]);
 
   function openCreate() {
     setForm(emptyForm());
@@ -189,13 +222,25 @@ export function AdminActualites() {
         )}
       </div>
 
-      <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterTab)} className="mb-5">
-        <TabsList>
-          <TabsTrigger value="tous">Toutes</TabsTrigger>
-          <TabsTrigger value="publie">Publiées</TabsTrigger>
-          <TabsTrigger value="brouillon">Brouillons</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+        <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterTab)}>
+          <TabsList>
+            <TabsTrigger value="tous">Toutes</TabsTrigger>
+            <TabsTrigger value="publie">Publiées</TabsTrigger>
+            <TabsTrigger value="brouillon">Brouillons</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <div className="relative sm:w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher une actualité…"
+            className="pl-9"
+          />
+        </div>
+      </div>
 
       {actualites === null ? (
         <div className="flex items-center gap-2 text-slate-500 text-sm">
@@ -210,16 +255,24 @@ export function AdminActualites() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Titre</TableHead>
-                <TableHead className="hidden md:table-cell">Type</TableHead>
-                <TableHead className="hidden lg:table-cell">Publié le</TableHead>
-                <TableHead>Statut</TableHead>
+                <TableHead>
+                  <SortableHeader label="Titre" active={sortKey === 'titre'} dir={sortDir} onClick={() => toggleSort('titre')} />
+                </TableHead>
+                <TableHead className="hidden md:table-cell">
+                  <SortableHeader label="Type" active={sortKey === 'type'} dir={sortDir} onClick={() => toggleSort('type')} />
+                </TableHead>
+                <TableHead className="hidden lg:table-cell">
+                  <SortableHeader label="Publié le" active={sortKey === 'created_at'} dir={sortDir} onClick={() => toggleSort('created_at')} />
+                </TableHead>
+                <TableHead>
+                  <SortableHeader label="Statut" active={sortKey === 'statut'} dir={sortDir} onClick={() => toggleSort('statut')} />
+                </TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((a) => (
-                <TableRow key={a.id}>
+                <TableRow key={a.id} className="cursor-pointer" onClick={() => setViewing(a)}>
                   <TableCell>
                     <div className="font-medium text-slate-900 line-clamp-1">{a.titre}</div>
                     <div className="text-xs text-slate-400 line-clamp-1">{a.description}</div>
@@ -235,8 +288,11 @@ export function AdminActualites() {
                       {STATUT_LABELS[a.statut]}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => setViewing(a)}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
                       {canEdit && (
                         <Button variant="ghost" size="icon" onClick={() => openEdit(a)}>
                           <Pencil className="w-4 h-4" />
@@ -260,6 +316,76 @@ export function AdminActualites() {
           </Table>
         </div>
       )}
+
+      <Dialog open={!!viewing} onOpenChange={(open) => !open && setViewing(null)}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          {viewing && (
+            <>
+              {viewing.image_url && (
+                <img
+                  src={viewing.image_url}
+                  alt={viewing.titre}
+                  className="w-full h-44 object-cover rounded-xl -mt-2"
+                />
+              )}
+              <DialogHeader>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <DialogTitle>{viewing.titre}</DialogTitle>
+                  <Badge variant="outline" className={STATUT_BADGE[viewing.statut]}>
+                    {STATUT_LABELS[viewing.statut]}
+                  </Badge>
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-4 text-sm">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="secondary">{TYPE_LABELS[viewing.type]}</Badge>
+                  <span className="text-xs text-slate-400">
+                    Publié le {new Date(viewing.created_at).toLocaleDateString('fr-FR')} — {viewing.auteur}
+                  </span>
+                </div>
+
+                {(viewing.date_evenement || viewing.lieu_evenement) && (
+                  <div className="flex flex-wrap gap-4 text-slate-600">
+                    {viewing.date_evenement && (
+                      <span className="flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                        {new Date(viewing.date_evenement).toLocaleDateString('fr-FR')}
+                      </span>
+                    )}
+                    {viewing.lieu_evenement && (
+                      <span className="flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                        {viewing.lieu_evenement}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                <p className="text-slate-600 italic">{viewing.description}</p>
+
+                <div className="pt-2 border-t border-slate-100">
+                  <p className="text-slate-700 whitespace-pre-wrap">{viewing.contenu}</p>
+                </div>
+              </div>
+
+              {canEdit && (
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setViewing(null);
+                      openEdit(viewing);
+                    }}
+                  >
+                    <Pencil className="w-4 h-4" /> Modifier
+                  </Button>
+                </DialogFooter>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
@@ -380,5 +506,28 @@ export function AdminActualites() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function SortableHeader({
+  label,
+  active,
+  dir,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  dir: 'asc' | 'desc';
+  onClick: () => void;
+}) {
+  return (
+    <button onClick={onClick} className="flex items-center gap-1 hover:text-slate-900">
+      {label}
+      {active ? (
+        dir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+      ) : (
+        <ArrowUpDown className="w-3 h-3 text-slate-300" />
+      )}
+    </button>
   );
 }

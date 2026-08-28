@@ -6,6 +6,7 @@ import {
   Trash2,
   FileText,
   Download,
+  Eye,
 } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
 import { useAuth } from '../../context/AuthContext';
@@ -91,6 +92,8 @@ export function AdminGuide() {
   });
 
   const [saving, setSaving] = useState(false);
+  const [viewingSection, setViewingSection] = useState<GuideSection | null>(null);
+  const [viewingSous, setViewingSous] = useState<GuideSousSection | null>(null);
 
   async function load() {
     try {
@@ -337,23 +340,28 @@ export function AdminGuide() {
                       </span>
                     </div>
                   </AccordionTrigger>
-                  {canWrite && (
-                    <div className="flex gap-1 shrink-0">
-                      <Button variant="ghost" size="icon" onClick={() => openEditSection(section)}>
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      {canDelete && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-brand-red-600 hover:text-brand-red-700"
-                          onClick={() => removeSection(section)}
-                        >
-                          <Trash2 className="w-4 h-4" />
+                  <div className="flex gap-1 shrink-0">
+                    <Button variant="ghost" size="icon" onClick={() => setViewingSection(section)}>
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    {canWrite && (
+                      <>
+                        <Button variant="ghost" size="icon" onClick={() => openEditSection(section)}>
+                          <Pencil className="w-4 h-4" />
                         </Button>
-                      )}
-                    </div>
-                  )}
+                        {canDelete && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-brand-red-600 hover:text-brand-red-700"
+                            onClick={() => removeSection(section)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 <AccordionContent>
@@ -373,23 +381,28 @@ export function AdminGuide() {
                                 </span>
                               </div>
                             </AccordionTrigger>
-                            {canWrite && (
-                              <div className="flex gap-1 shrink-0">
-                                <Button variant="ghost" size="icon" onClick={() => openEditSous(sous)}>
-                                  <Pencil className="w-3.5 h-3.5" />
-                                </Button>
-                                {canDelete && (
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="text-brand-red-600 hover:text-brand-red-700"
-                                    onClick={() => removeSous(sous)}
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
+                            <div className="flex gap-1 shrink-0">
+                              <Button variant="ghost" size="icon" onClick={() => setViewingSous(sous)}>
+                                <Eye className="w-3.5 h-3.5" />
+                              </Button>
+                              {canWrite && (
+                                <>
+                                  <Button variant="ghost" size="icon" onClick={() => openEditSous(sous)}>
+                                    <Pencil className="w-3.5 h-3.5" />
                                   </Button>
-                                )}
-                              </div>
-                            )}
+                                  {canDelete && (
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="text-brand-red-600 hover:text-brand-red-700"
+                                      onClick={() => removeSous(sous)}
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                  )}
+                                </>
+                              )}
+                            </div>
                           </div>
 
                           <AccordionContent>
@@ -459,6 +472,99 @@ export function AdminGuide() {
           </Accordion>
         </div>
       )}
+
+      {/* Détail Section (lecture seule) */}
+      <Dialog open={!!viewingSection} onOpenChange={(open) => !open && setViewingSection(null)}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          {viewingSection && (
+            <>
+              {viewingSection.image_url && (
+                <img
+                  src={viewingSection.image_url}
+                  alt={viewingSection.titre}
+                  className="w-full h-40 object-cover rounded-xl -mt-2"
+                />
+              )}
+              <DialogHeader>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <DialogTitle>{viewingSection.titre}</DialogTitle>
+                  <Badge variant="outline" className={STATUT_BADGE[viewingSection.statut]}>
+                    {STATUT_LABELS[viewingSection.statut]}
+                  </Badge>
+                </div>
+              </DialogHeader>
+              <div className="space-y-3 text-sm">
+                {viewingSection.categorie && <Badge variant="secondary">{viewingSection.categorie}</Badge>}
+                {viewingSection.description && <p className="text-slate-600">{viewingSection.description}</p>}
+                {viewingSection.contenu && (
+                  <p className="text-slate-700 whitespace-pre-wrap pt-2 border-t border-slate-100">
+                    {viewingSection.contenu}
+                  </p>
+                )}
+              </div>
+              {canWrite && (
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setViewingSection(null);
+                      openEditSection(viewingSection);
+                    }}
+                  >
+                    <Pencil className="w-4 h-4" /> Modifier
+                  </Button>
+                </DialogFooter>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Détail Sous-section (lecture seule) */}
+      <Dialog open={!!viewingSous} onOpenChange={(open) => !open && setViewingSous(null)}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          {viewingSous && (
+            <>
+              {viewingSous.image_url && (
+                <img
+                  src={viewingSous.image_url}
+                  alt={viewingSous.titre}
+                  className="w-full h-40 object-cover rounded-xl -mt-2"
+                />
+              )}
+              <DialogHeader>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <DialogTitle>{viewingSous.titre}</DialogTitle>
+                  <Badge variant="outline" className={STATUT_BADGE[viewingSous.statut]}>
+                    {STATUT_LABELS[viewingSous.statut]}
+                  </Badge>
+                </div>
+              </DialogHeader>
+              <div className="space-y-3 text-sm">
+                {viewingSous.contenu && (
+                  <p className="text-slate-700 whitespace-pre-wrap">{viewingSous.contenu}</p>
+                )}
+                <p className="text-xs text-slate-400">
+                  {viewingSous.documents.length} document{viewingSous.documents.length > 1 ? 's' : ''}
+                </p>
+              </div>
+              {canWrite && (
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setViewingSous(null);
+                      openEditSous(viewingSous);
+                    }}
+                  >
+                    <Pencil className="w-4 h-4" /> Modifier
+                  </Button>
+                </DialogFooter>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog Section */}
       <Dialog open={!!sectionEditing} onOpenChange={(open) => !open && setSectionEditing(null)}>

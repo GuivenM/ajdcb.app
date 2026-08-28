@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Pencil, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, Eye, Calendar, MapPin, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import type { Action, StatutAction, SectionAction } from '../types';
@@ -91,8 +91,12 @@ export function AdminActions() {
   const [actions, setActions] = useState<Action[] | null>(null);
   const [filter, setFilter] = useState<FilterTab>('toutes');
   const [editing, setEditing] = useState<Action | 'new' | null>(null);
+  const [viewing, setViewing] = useState<Action | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm());
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
+  const [sortKey, setSortKey] = useState<'titre' | 'section' | 'statut'>('titre');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   async function load() {
     try {
@@ -107,11 +111,39 @@ export function AdminActions() {
     load();
   }, []);
 
+  function toggleSort(key: 'titre' | 'section' | 'statut') {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  }
+
   const filtered = useMemo(() => {
     if (!actions) return [];
-    if (filter === 'toutes') return actions;
-    return actions.filter((a) => a.section === filter);
-  }, [actions, filter]);
+    let list = filter === 'toutes' ? actions : actions.filter((a) => a.section === filter);
+
+    const q = search.trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (a) =>
+          a.titre.toLowerCase().includes(q) ||
+          a.description.toLowerCase().includes(q) ||
+          (a.lieu || '').toLowerCase().includes(q)
+      );
+    }
+
+    const sorted = [...list].sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === 'titre') cmp = a.titre.localeCompare(b.titre);
+      else if (sortKey === 'section') cmp = a.section.localeCompare(b.section);
+      else cmp = a.statut.localeCompare(b.statut);
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+
+    return sorted;
+  }, [actions, filter, search, sortKey, sortDir]);
 
   function openCreate() {
     setForm(emptyForm());
@@ -206,14 +238,26 @@ export function AdminActions() {
         )}
       </div>
 
-      <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterTab)} className="mb-5">
-        <TabsList className="flex-wrap h-auto">
-          <TabsTrigger value="toutes">Toutes</TabsTrigger>
-          {Object.entries(SECTION_LABELS).map(([value, label]) => (
-            <TabsTrigger key={value} value={value}>{label}</TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">
+        <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterTab)}>
+          <TabsList className="flex-wrap h-auto">
+            <TabsTrigger value="toutes">Toutes</TabsTrigger>
+            {Object.entries(SECTION_LABELS).map(([value, label]) => (
+              <TabsTrigger key={value} value={value}>{label}</TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+
+        <div className="relative lg:w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher une action…"
+            className="pl-9"
+          />
+        </div>
+      </div>
 
       {actions === null ? (
         <div className="flex items-center gap-2 text-slate-500 text-sm">
@@ -228,16 +272,22 @@ export function AdminActions() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Action</TableHead>
-                <TableHead className="hidden md:table-cell">Commission</TableHead>
+                <TableHead>
+                  <SortableHeader label="Action" active={sortKey === 'titre'} dir={sortDir} onClick={() => toggleSort('titre')} />
+                </TableHead>
+                <TableHead className="hidden md:table-cell">
+                  <SortableHeader label="Commission" active={sortKey === 'section'} dir={sortDir} onClick={() => toggleSort('section')} />
+                </TableHead>
                 <TableHead className="hidden lg:table-cell">Lieu</TableHead>
-                <TableHead>Statut</TableHead>
+                <TableHead>
+                  <SortableHeader label="Statut" active={sortKey === 'statut'} dir={sortDir} onClick={() => toggleSort('statut')} />
+                </TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((a) => (
-                <TableRow key={a.id}>
+                <TableRow key={a.id} className="cursor-pointer" onClick={() => setViewing(a)}>
                   <TableCell>
                     <div className="font-medium text-slate-900 line-clamp-1">{a.titre}</div>
                     <div className="text-xs text-slate-400 line-clamp-1">{a.description}</div>
@@ -253,8 +303,11 @@ export function AdminActions() {
                       {STATUT_LABELS[a.statut]}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => setViewing(a)}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
                       {canWrite && (
                         <Button variant="ghost" size="icon" onClick={() => openEdit(a)}>
                           <Pencil className="w-4 h-4" />
@@ -278,6 +331,110 @@ export function AdminActions() {
           </Table>
         </div>
       )}
+
+      <Dialog open={!!viewing} onOpenChange={(open) => !open && setViewing(null)}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          {viewing && (
+            <>
+              {viewing.image_url && (
+                <img
+                  src={viewing.image_url}
+                  alt={viewing.titre}
+                  className="w-full h-44 object-cover rounded-xl -mt-2"
+                />
+              )}
+              <DialogHeader>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <DialogTitle>{viewing.titre}</DialogTitle>
+                  <Badge variant="outline" className={STATUT_BADGE[viewing.statut]}>
+                    {STATUT_LABELS[viewing.statut]}
+                  </Badge>
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-4 text-sm">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="secondary">{SECTION_LABELS[viewing.section]}</Badge>
+                </div>
+
+                <p className="text-slate-600">{viewing.description}</p>
+
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
+                  {(viewing.date_debut || viewing.date_fin) && (
+                    <div className="col-span-2">
+                      <p className="text-slate-400 text-xs flex items-center gap-1">
+                        <Calendar className="w-3 h-3" /> Période
+                      </p>
+                      <p className="text-slate-700">
+                        {viewing.date_debut ? new Date(viewing.date_debut).toLocaleDateString('fr-FR') : '?'}
+                        {' → '}
+                        {viewing.date_fin ? new Date(viewing.date_fin).toLocaleDateString('fr-FR') : '?'}
+                      </p>
+                    </div>
+                  )}
+                  {viewing.date_evenement && (
+                    <div>
+                      <p className="text-slate-400 text-xs flex items-center gap-1">
+                        <Calendar className="w-3 h-3" /> Date
+                      </p>
+                      <p className="text-slate-700">{new Date(viewing.date_evenement).toLocaleDateString('fr-FR')}</p>
+                    </div>
+                  )}
+                  {viewing.lieu && (
+                    <div>
+                      <p className="text-slate-400 text-xs flex items-center gap-1">
+                        <MapPin className="w-3 h-3" /> Lieu
+                      </p>
+                      <p className="text-slate-700">{viewing.lieu}</p>
+                    </div>
+                  )}
+                </dl>
+
+                {viewing.objectifs && viewing.objectifs.length > 0 && (
+                  <div>
+                    <p className="text-slate-400 text-xs mb-1">Objectifs</p>
+                    <ul className="list-disc list-inside text-slate-700 space-y-0.5">
+                      {viewing.objectifs.map((o, i) => <li key={i}>{o}</li>)}
+                    </ul>
+                  </div>
+                )}
+
+                {viewing.activites_cles && viewing.activites_cles.length > 0 && (
+                  <div>
+                    <p className="text-slate-400 text-xs mb-1">Activités clés</p>
+                    <ul className="list-disc list-inside text-slate-700 space-y-0.5">
+                      {viewing.activites_cles.map((o, i) => <li key={i}>{o}</li>)}
+                    </ul>
+                  </div>
+                )}
+
+                {viewing.resultats && viewing.resultats.length > 0 && (
+                  <div>
+                    <p className="text-slate-400 text-xs mb-1">Résultats</p>
+                    <ul className="list-disc list-inside text-slate-700 space-y-0.5">
+                      {viewing.resultats.map((o, i) => <li key={i}>{o}</li>)}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              {canWrite && (
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setViewing(null);
+                      openEdit(viewing);
+                    }}
+                  >
+                    <Pencil className="w-4 h-4" /> Modifier
+                  </Button>
+                </DialogFooter>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
@@ -373,5 +530,28 @@ export function AdminActions() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function SortableHeader({
+  label,
+  active,
+  dir,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  dir: 'asc' | 'desc';
+  onClick: () => void;
+}) {
+  return (
+    <button onClick={onClick} className="flex items-center gap-1 hover:text-slate-900">
+      {label}
+      {active ? (
+        dir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+      ) : (
+        <ArrowUpDown className="w-3 h-3 text-slate-300" />
+      )}
+    </button>
   );
 }

@@ -48,8 +48,7 @@ export function About() {
           </div>
           <div className="text-center">
             <div className="w-16 h-16 bg-slate-200 rounded-full mx-auto mb-4 overflow-hidden">
-               {/* President Photo Placeholder */}
-               <div className="w-full h-full bg-slate-300"></div>
+               <img src="/bureau/president.jpeg" alt="Seyla Reynold TOKANOU" className="w-full h-full object-cover" />
             </div>
             <div className="font-bold text-slate-900">Seyla Reynold TOKANOU</div>
             <div className="text-sm text-slate-500 uppercase tracking-widest">Président de l'AJDCB</div>
@@ -61,12 +60,14 @@ export function About() {
           <h2 className="text-3xl font-bold text-slate-900 mb-12 text-center">Bureau Exécutif National</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { name: "Seyla Reynold TOKANOU", role: "Président" },
-              { name: "Pergely Clesh Alverain BASSADILA", role: "Secrétaire Général" },
-              { name: "Adam Brel Guydalrich GANGA", role: "Trésorier" }
+              { name: "Seyla Reynold TOKANOU", role: "Président", photo: "/bureau/president.jpeg" },
+              { name: "Pergely Clesh Alverain BASSADILA", role: "Secrétaire Général", photo: "/bureau/secretaire-general.jpeg" },
+              { name: "Adam Brel Guydalrich GANGA", role: "Trésorier", photo: "/bureau/tresorier.jpg" }
             ].map((member, i) => (
               <div key={i} className="bg-slate-50 p-6 rounded-2xl text-center hover:bg-white hover:shadow-lg transition-all border border-slate-100">
-                <div className="w-24 h-24 bg-slate-200 rounded-full mx-auto mb-4"></div>
+                <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-slate-200">
+                  <img src={member.photo} alt={member.name} className="w-full h-full object-cover" />
+                </div>
                 <h3 className="font-bold text-slate-900">{member.name}</h3>
                 <p className="text-sm text-brand-green-600 font-medium">{member.role}</p>
               </div>

@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Trash2, Eye, Send } from 'lucide-react';
+import { Loader2, Trash2, Eye, Send, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import type { Message, StatutMessage, ObjetMessage } from '../types';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
+import { Input } from '../../components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import {
   Table,
@@ -58,6 +59,9 @@ export function AdminMessages() {
   const [selected, setSelected] = useState<Message | null>(null);
   const [reponse, setReponse] = useState('');
   const [sending, setSending] = useState(false);
+  const [search, setSearch] = useState('');
+  const [sortKey, setSortKey] = useState<'contact' | 'objet' | 'created_at' | 'statut'>('created_at');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   async function load() {
     try {
@@ -72,11 +76,40 @@ export function AdminMessages() {
     load();
   }, []);
 
+  function toggleSort(key: 'contact' | 'objet' | 'created_at' | 'statut') {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  }
+
   const filtered = useMemo(() => {
     if (!messages) return [];
-    if (filter === 'tous') return messages;
-    return messages.filter((m) => m.statut === filter);
-  }, [messages, filter]);
+    let list = filter === 'tous' ? messages : messages.filter((m) => m.statut === filter);
+
+    const q = search.trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (m) =>
+          `${m.prenom} ${m.nom}`.toLowerCase().includes(q) ||
+          m.email.toLowerCase().includes(q) ||
+          m.message.toLowerCase().includes(q)
+      );
+    }
+
+    const sorted = [...list].sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === 'contact') cmp = `${a.prenom} ${a.nom}`.localeCompare(`${b.prenom} ${b.nom}`);
+      else if (sortKey === 'objet') cmp = a.objet.localeCompare(b.objet);
+      else if (sortKey === 'statut') cmp = a.statut.localeCompare(b.statut);
+      else cmp = a.created_at.localeCompare(b.created_at);
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+
+    return sorted;
+  }, [messages, filter, search, sortKey, sortDir]);
 
   async function openDetail(m: Message) {
     setSelected(m);
@@ -133,14 +166,26 @@ export function AdminMessages() {
         </div>
       </div>
 
-      <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterTab)} className="mb-5">
-        <TabsList>
-          <TabsTrigger value="tous">Tous</TabsTrigger>
-          <TabsTrigger value="non_lu">Non lus</TabsTrigger>
-          <TabsTrigger value="lu">Lus</TabsTrigger>
-          <TabsTrigger value="repondu">Répondus</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+        <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterTab)}>
+          <TabsList>
+            <TabsTrigger value="tous">Tous</TabsTrigger>
+            <TabsTrigger value="non_lu">Non lus</TabsTrigger>
+            <TabsTrigger value="lu">Lus</TabsTrigger>
+            <TabsTrigger value="repondu">Répondus</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <div className="relative sm:w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un message…"
+            className="pl-9"
+          />
+        </div>
+      </div>
 
       {messages === null ? (
         <div className="flex items-center gap-2 text-slate-500">
@@ -155,16 +200,24 @@ export function AdminMessages() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Contact</TableHead>
-                <TableHead className="hidden md:table-cell">Objet</TableHead>
-                <TableHead className="hidden lg:table-cell">Reçu le</TableHead>
-                <TableHead>Statut</TableHead>
+                <TableHead>
+                  <SortableHeader label="Contact" active={sortKey === 'contact'} dir={sortDir} onClick={() => toggleSort('contact')} />
+                </TableHead>
+                <TableHead className="hidden md:table-cell">
+                  <SortableHeader label="Objet" active={sortKey === 'objet'} dir={sortDir} onClick={() => toggleSort('objet')} />
+                </TableHead>
+                <TableHead className="hidden lg:table-cell">
+                  <SortableHeader label="Reçu le" active={sortKey === 'created_at'} dir={sortDir} onClick={() => toggleSort('created_at')} />
+                </TableHead>
+                <TableHead>
+                  <SortableHeader label="Statut" active={sortKey === 'statut'} dir={sortDir} onClick={() => toggleSort('statut')} />
+                </TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((m) => (
-                <TableRow key={m.id} className={m.statut === 'non_lu' ? 'bg-brand-red-50/30' : ''}>
+                <TableRow key={m.id} className={`cursor-pointer ${m.statut === 'non_lu' ? 'bg-brand-red-50/30' : ''}`} onClick={() => openDetail(m)}>
                   <TableCell>
                     <div className="font-medium text-slate-900">
                       {m.prenom} {m.nom}
@@ -182,7 +235,7 @@ export function AdminMessages() {
                       {STATUT_LABELS[m.statut]}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex justify-end gap-1">
                       <Button variant="ghost" size="icon" onClick={() => openDetail(m)}>
                         <Eye className="w-4 h-4" />
@@ -277,5 +330,28 @@ export function AdminMessages() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function SortableHeader({
+  label,
+  active,
+  dir,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  dir: 'asc' | 'desc';
+  onClick: () => void;
+}) {
+  return (
+    <button onClick={onClick} className="flex items-center gap-1 hover:text-slate-900">
+      {label}
+      {active ? (
+        dir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+      ) : (
+        <ArrowUpDown className="w-3 h-3 text-slate-300" />
+      )}
+    </button>
   );
 }

@@ -253,6 +253,8 @@ export interface Action {
   date_fin: string | null;
   date_evenement: string | null;
   lieu: string | null;
+  date_affichage: string | null;
+  lieu_affichage: string | null;
   objectifs: string[] | null;
   activites_cles: string[] | null;
   resultats: string[] | null;

@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Users, GraduationCap, Globe, Handshake, ChevronRight, Play } from 'lucide-react';
+import { ArrowRight, Users, GraduationCap, Globe, Handshake, ChevronRight, Play, Loader2 } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { api, ApiError } from '../../lib/api';
+import { Actualite } from '../admin/types';
 
 const stats = [
   { label: "Membres Actifs", value: "500+" },
@@ -43,6 +45,19 @@ const axes = [
 ];
 
 export function Home() {
+  const [actualites, setActualites] = useState<Actualite[]>([]);
+  const [loadingActualites, setLoadingActualites] = useState(true);
+
+  useEffect(() => {
+    api
+      .get<Actualite[]>('/v1/actualites/dernieres')
+      .then(setActualites)
+      .catch((err) => {
+        if (!(err instanceof ApiError)) console.error(err);
+      })
+      .finally(() => setLoadingActualites(false));
+  }, []);
+
   return (
     <div className="overflow-hidden bg-white">
       {/* 
@@ -53,7 +68,7 @@ export function Home() {
         {/* Background Image with Parallax-like fix */}
         <div className="absolute inset-0 z-0">
           <ImageWithFallback 
-            src="/bg.jpeg"
+            src="/file.jpg"
             alt="Hero Background"
             className="w-full h-full object-cover scale-105"
           />
@@ -151,7 +166,7 @@ export function Home() {
             >
                <div className="absolute -inset-4 bg-gradient-to-tr from-brand-green-100 to-brand-gold-100 rounded-[2rem] rotate-3 opacity-70"></div>
                <ImageWithFallback 
-                 src="https://images.unsplash.com/photo-1576267423445-b2e0074d68a4?q=80&w=800&auto=format&fit=crop" 
+                 src="/us.jpeg" 
                  alt="AJDCB Community" 
                  className="relative rounded-[1.5rem] shadow-2xl w-full object-cover aspect-[4/3]"
                />
@@ -241,39 +256,51 @@ export function Home() {
             </Link>
           </div>
 
+          {loadingActualites && (
+            <div className="flex justify-center py-16 text-slate-400">
+              <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
+          )}
+
+          {!loadingActualites && actualites.length === 0 && (
+            <div className="text-center py-16 text-slate-500">Aucune actualité publiée pour le moment.</div>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
+            {actualites.map((item, i) => (
               <motion.div 
-                key={i}
+                key={item.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.2 }}
                 className="group cursor-pointer"
               >
-                <div className="relative overflow-hidden rounded-2xl mb-6 aspect-[16/10]">
+                <Link to={`/news/${item.id}`}>
+                <div className="relative overflow-hidden rounded-2xl mb-6 aspect-[16/10] bg-slate-100">
                   <ImageWithFallback 
-                    src={`https://images.unsplash.com/photo-${i === 1 ? '1523580494863-6f3031224c94' : i === 2 ? '1543269865-cbf427effbad' : '1531545514254-3d0b71430260'}?q=80&w=800&auto=format&fit=crop`}
-                    alt="News" 
+                    src={item.image_url || 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=800&auto=format&fit=crop'}
+                    alt={item.titre} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
                      <span className="text-white font-semibold flex items-center gap-2">Lire l'article <ArrowRight size={16} /></span>
                   </div>
                   <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider text-brand-green-800 shadow-sm">
-                    {i === 1 ? 'Culture' : 'Éducation'}
+                    {item.type_label}
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-3 text-sm text-slate-500 mb-3">
-                  <span className="font-medium text-brand-green-600">12 Février 2026</span>
-                  <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                  <span>5 min de lecture</span>
+                  <span className="font-medium text-brand-green-600">
+                    {new Date(item.date_evenement || item.created_at).toLocaleDateString('fr-FR', { dateStyle: 'long' })}
+                  </span>
                 </div>
                 
                 <h3 className="text-xl font-bold text-slate-900 mb-3 leading-snug group-hover:text-brand-green-700 transition-colors">
-                  {i === 1 ? 'Retour sur la soirée culturelle "Nuit du Congo"' : i === 2 ? 'Lancement officiel du programme de bourses 2026' : 'Rencontre avec les nouveaux étudiants à Cotonou'}
+                  {item.titre}
                 </h3>
+                </Link>
               </motion.div>
             ))}
           </div>
