@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Pencil, Trash2, UserX, UserCheck, Eye, MessageCircle, Facebook, Instagram, Linkedin, Twitter, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, UserX, UserCheck, Eye, MessageCircle, Facebook, Instagram, Linkedin, Twitter, Search, ArrowUp, ArrowDown, ArrowUpDown, Link2 } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import type { Membre, StatutMembre } from '../types';
@@ -242,6 +242,7 @@ export function AdminMembres() {
           <TabsList>
             <TabsTrigger value="tous">Tous</TabsTrigger>
             <TabsTrigger value="actif">Actifs</TabsTrigger>
+            <TabsTrigger value="en_attente_paiement">En attente</TabsTrigger>
             <TabsTrigger value="inactif">Inactifs</TabsTrigger>
           </TabsList>
         </Tabs>
@@ -304,10 +305,12 @@ export function AdminMembres() {
                       className={
                         m.statut === 'actif'
                           ? 'bg-brand-green-50 text-brand-green-600 border-brand-green-200'
+                          : m.statut === 'en_attente_paiement'
+                          ? 'bg-amber-50 text-amber-600 border-amber-200'
                           : 'bg-slate-100 text-slate-500 border-slate-200'
                       }
                     >
-                      {m.statut === 'actif' ? 'Actif' : 'Inactif'}
+                      {m.statut === 'actif' ? 'Actif' : m.statut === 'en_attente_paiement' ? 'En attente de paiement' : 'Inactif'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
@@ -315,6 +318,19 @@ export function AdminMembres() {
                       <Button variant="ghost" size="icon" onClick={() => setViewing(m)}>
                         <Eye className="w-4 h-4" />
                       </Button>
+                      {canWrite && m.statut !== 'actif' && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Copier le lien de paiement à envoyer au membre"
+                          onClick={() => {
+                            navigator.clipboard.writeText(`${window.location.origin}/cotisation/${m.id}`);
+                            toast.success('Lien de paiement copié.');
+                          }}
+                        >
+                          <Link2 className="w-4 h-4" />
+                        </Button>
+                      )}
                       {canWrite && (
                         <>
                           <Button variant="ghost" size="icon" onClick={() => openEdit(m)}>
@@ -370,10 +386,12 @@ export function AdminMembres() {
                     className={
                       viewing.statut === 'actif'
                         ? 'bg-brand-green-50 text-brand-green-600 border-brand-green-200'
+                        : viewing.statut === 'en_attente_paiement'
+                        ? 'bg-amber-50 text-amber-600 border-amber-200'
                         : 'bg-slate-100 text-slate-500 border-slate-200'
                     }
                   >
-                    {viewing.statut === 'actif' ? 'Actif' : 'Inactif'}
+                    {viewing.statut === 'actif' ? 'Actif' : viewing.statut === 'en_attente_paiement' ? 'En attente de paiement' : 'Inactif'}
                   </Badge>
                 </div>
               </DialogHeader>
@@ -441,6 +459,17 @@ export function AdminMembres() {
 
               {canWrite && (
                 <DialogFooter>
+                  {viewing.statut !== 'actif' && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/cotisation/${viewing.id}`);
+                        toast.success('Lien de paiement copié.');
+                      }}
+                    >
+                      <Link2 className="w-4 h-4" /> Copier le lien de paiement
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     onClick={() => {

@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Users, GraduationCap, Palette, Handshake, Check, Loader2, ArrowRight } from 'lucide-react';
+import { Users, GraduationCap, Palette, Handshake, Loader2, ArrowRight } from 'lucide-react';
 import { api, ApiError } from '../../lib/api';
 import { Action, SectionAction } from '../admin/types';
 
-// Les 4 piliers sont fixes (mêmes valeurs que la Commission choisie en admin).
-// Le titre/texte ci-dessous sert de repli tant qu'aucune action "actif" n'a
-// été créée pour ce pilier ; dès qu'il y en a une, son propre titre/description
-// prend le dessus.
+// Les 4 piliers sont fixes (mêmes valeurs que la Commission choisie en admin)
+// et gardent toujours leur propre nom/texte de présentation — les actions
+// créées dessous n'apparaissent jamais à la place, seulement en cliquant
+// sur le pilier (page /actions/{section}).
 const PILLARS: { section: SectionAction; title: string; fallbackDesc: string; icon: React.ReactNode; color: 'emerald' | 'blue' | 'red' | 'purple' }[] = [
   {
     section: 'solidarite',
@@ -93,16 +93,14 @@ export function Actions() {
 
       <div className="container mx-auto px-4 md:px-6 py-24 space-y-32">
         {!loading && !error && PILLARS.map((pillar, index) => {
-          // Réalisation la plus récente de ce pilier, s'il y en a une : elle
-          // fournit le titre/texte/image réels ; sinon on garde le texte de
-          // présentation générique du pilier.
-          const latest = actions
-            .filter((a) => a.section === pillar.section)
-            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
-
-          const tags = (latest?.activites_cles ?? []).slice(0, 3);
-          const checklist = (latest?.objectifs ?? []).slice(0, 3);
-          const stat = (latest?.resultats ?? [])[0];
+          // Le pilier garde toujours son propre nom/texte. Les actions créées
+          // dessous (ex: "Nettoyage de plage 2026") ne sont que des éléments
+          // du pilier, visibles en cliquant dessus — jamais affichées ici à
+          // la place de l'identité du pilier.
+          const actionsDuPilier = actions.filter((a) => a.section === pillar.section);
+          const derniere = [...actionsDuPilier].sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          )[0];
 
           return (
           <Link to={`/actions/${pillar.section}`} key={pillar.section} className="block group/pillar">
@@ -121,30 +119,21 @@ export function Actions() {
                 
                 <div className="relative rounded-[2rem] overflow-hidden shadow-2xl aspect-[4/3]">
                   <img 
-                    src={latest?.image_url || FALLBACK_IMAGE} 
+                    src={derniere?.image_url || FALLBACK_IMAGE} 
                     alt={pillar.title} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  {tags.length > 0 && (
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8">
-                       <div className="flex gap-2 mb-2">
-                         {tags.map((tag, i) => (
-                           <span key={i} className="px-3 py-1 bg-white/20 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-lg">
-                             {tag}
-                           </span>
-                         ))}
-                       </div>
-                    </div>
-                  )}
                 </div>
                 
-                {/* Floating Stat Badge */}
-                {stat && (
+                {/* Floating count badge */}
+                {actionsDuPilier.length > 0 && (
                   <div className="absolute -top-6 -right-6 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-3 animate-bounce-slow">
                      <div className={`w-10 h-10 rounded-full bg-${pillar.color}-100 flex items-center justify-center text-${pillar.color}-600`}>
                        {pillar.icon}
                      </div>
-                     <span className="font-bold text-slate-900">{stat}</span>
+                     <span className="font-bold text-slate-900">
+                       {actionsDuPilier.length} réalisation{actionsDuPilier.length > 1 ? 's' : ''}
+                     </span>
                   </div>
                 )}
               </div>
@@ -159,23 +148,10 @@ export function Actions() {
                 </span>
               </div>
               
-              <h2 className="text-4xl font-bold text-slate-900 mb-6 leading-tight">{latest?.titre || pillar.title}</h2>
+              <h2 className="text-4xl font-bold text-slate-900 mb-6 leading-tight">{pillar.title}</h2>
               <p className="text-xl text-slate-600 mb-8 leading-relaxed font-light">
-                {latest?.description || pillar.fallbackDesc}
+                {pillar.fallbackDesc}
               </p>
-
-              {checklist.length > 0 && (
-                <div className="space-y-4 mb-10">
-                  {checklist.map((item, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <div className={`w-6 h-6 rounded-full bg-${pillar.color}-100 flex items-center justify-center`}>
-                        <Check size={14} className={`text-${pillar.color}-600`} />
-                      </div>
-                      <span className="text-slate-700 font-medium">{item}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
 
               <span className={`inline-flex items-center gap-2 font-bold text-${pillar.color}-600 group-hover/pillar:gap-3 transition-all`}>
                 Voir les réalisations

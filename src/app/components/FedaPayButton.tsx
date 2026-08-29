@@ -51,13 +51,23 @@ export function FedaPayButton({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<PayeurForm>({ defaultValues });
+  const nomConnu = defaultValues?.nom_payeur;
+  const telephoneConnu = defaultValues?.telephone_payeur;
+  // Membre déjà identifié (lien personnel avec membre_id) et son numéro est
+  // en base : plus rien à demander, on part direct sur FedaPay au clic.
+  const coordonneesCompletes = Boolean(nomConnu && telephoneConnu);
 
-  const onSubmit = async (data: PayeurForm) => {
+  const lancerPaiement = async (data: Partial<PayeurForm>) => {
     setLoading(true);
     try {
       const result = await api.post<{ paiement_id: number; checkout_url: string }>(
         endpoint,
-        { ...data, ...extraPayload }
+        {
+          nom_payeur: nomConnu || data.nom_payeur,
+          telephone_payeur: telephoneConnu || data.telephone_payeur,
+          email_payeur: data.email_payeur,
+          ...extraPayload,
+        }
       );
       // Redirection vers la page de paiement sécurisée FedaPay.
       window.location.href = result.checkout_url;
@@ -67,6 +77,15 @@ export function FedaPayButton({
       setLoading(false);
     }
   };
+
+  if (coordonneesCompletes) {
+    return (
+      <Button className={className} disabled={loading} onClick={() => lancerPaiement({})}>
+        {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CreditCard className="w-4 h-4 mr-2" />}
+        {label} — {montant.toLocaleString('fr-FR')} {devise}
+      </Button>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -83,12 +102,18 @@ export function FedaPayButton({
             Nécessaires pour générer votre lien de paiement FedaPay ({montant.toLocaleString('fr-FR')} {devise}).
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <Label htmlFor="nom_payeur">Nom complet</Label>
-            <Input id="nom_payeur" {...register('nom_payeur', { required: true })} />
-            {errors.nom_payeur && <span className="text-red-500 text-xs">Requis</span>}
-          </div>
+        <form onSubmit={handleSubmit(lancerPaiement)} className="space-y-4">
+          {nomConnu ? (
+            <div className="text-sm text-slate-500 -mt-1">
+              Paiement au nom de <span className="font-medium text-slate-700">{nomConnu}</span>
+            </div>
+          ) : (
+            <div>
+              <Label htmlFor="nom_payeur">Nom complet</Label>
+              <Input id="nom_payeur" {...register('nom_payeur', { required: true })} />
+              {errors.nom_payeur && <span className="text-red-500 text-xs">Requis</span>}
+            </div>
+          )}
           <div>
             <Label htmlFor="telephone_payeur">Téléphone (Mobile Money)</Label>
             <Input id="telephone_payeur" placeholder="+229 00 00 00 00" {...register('telephone_payeur', { required: true })} />

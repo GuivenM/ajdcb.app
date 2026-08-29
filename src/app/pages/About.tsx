@@ -1,8 +1,28 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { Quote } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { api, ApiError } from '../../lib/api';
+import { Membre } from '../admin/types';
 
 export function About() {
+  const [bureau, setBureau] = useState<Membre[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .get<Membre[]>('/v1/membres/bureau')
+      .then(setBureau)
+      .catch((err) => {
+        if (!(err instanceof ApiError)) console.error(err);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Le bureau renvoyé par l'API est déjà trié par rang (Président en premier,
+  // etc.) — on s'appuie sur ce tri plutôt que de supposer un nombre fixe de
+  // membres ou un "Président" toujours présent.
+  const president = bureau[0];
+
   return (
     <div className="bg-white min-h-screen">
       {/* Header */}
@@ -46,30 +66,55 @@ export function About() {
               L’AJDCB est née d’une conviction simple : <span className="font-bold text-brand-green-600">une jeunesse organisée</span> est une force de transformation irrésistible.
             </p>
           </div>
-          <div className="text-center">
-            <div className="w-16 h-16 bg-slate-200 rounded-full mx-auto mb-4 overflow-hidden">
-               <img src="/bureau/president.jpeg" alt="Seyla Reynold TOKANOU" className="w-full h-full object-cover" />
+          {president && (
+            <div className="text-center">
+              <div className="w-16 h-16 bg-slate-200 rounded-full mx-auto mb-4 overflow-hidden">
+                {president.photo_url ? (
+                  <img src={president.photo_url} alt={president.nom_complet} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-slate-500 font-bold">
+                    {president.prenom[0]}{president.nom[0]}
+                  </div>
+                )}
+              </div>
+              <div className="font-bold text-slate-900">{president.nom_complet}</div>
+              <div className="text-sm text-slate-500 uppercase tracking-widest">{president.poste} de l'AJDCB</div>
             </div>
-            <div className="font-bold text-slate-900">Seyla Reynold TOKANOU</div>
-            <div className="text-sm text-slate-500 uppercase tracking-widest">Président de l'AJDCB</div>
-          </div>
+          )}
         </div>
 
         {/* Team Grid */}
         <div className="mb-20">
           <h2 className="text-3xl font-bold text-slate-900 mb-12 text-center">Bureau Exécutif National</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { name: "Seyla Reynold TOKANOU", role: "Président", photo: "/bureau/president.jpeg" },
-              { name: "Pergely Clesh Alverain BASSADILA", role: "Secrétaire Général", photo: "/bureau/secretaire-general.jpeg" },
-              { name: "Adam Brel Guydalrich GANGA", role: "Trésorier", photo: "/bureau/tresorier.jpg" }
-            ].map((member, i) => (
-              <div key={i} className="bg-slate-50 p-6 rounded-2xl text-center hover:bg-white hover:shadow-lg transition-all border border-slate-100">
-                <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-slate-200">
-                  <img src={member.photo} alt={member.name} className="w-full h-full object-cover" />
+
+          {loading && (
+            <div className="flex justify-center py-12 text-slate-400">
+              <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
+          )}
+
+          {!loading && bureau.length === 0 && (
+            <div className="text-center py-12 text-slate-500">Composition du bureau à venir.</div>
+          )}
+
+          {/* flex-wrap plutôt qu'une grille stricte : le nombre de membres du
+              bureau varie (ajouts/retraits en admin), ça reste centré et propre
+              que ce soit 2, 5 ou 9 cartes. */}
+          <div className="flex flex-wrap justify-center gap-6">
+            {bureau.map((member) => (
+              <div
+                key={member.id}
+                className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] bg-slate-50 p-6 rounded-2xl text-center hover:bg-white hover:shadow-lg transition-all border border-slate-100"
+              >
+                <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xl">
+                  {member.photo_url ? (
+                    <img src={member.photo_url} alt={member.nom_complet} className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{member.prenom[0]}{member.nom[0]}</span>
+                  )}
                 </div>
-                <h3 className="font-bold text-slate-900">{member.name}</h3>
-                <p className="text-sm text-brand-green-600 font-medium">{member.role}</p>
+                <h3 className="font-bold text-slate-900">{member.nom_complet}</h3>
+                <p className="text-sm text-brand-green-600 font-medium">{member.poste}</p>
               </div>
             ))}
           </div>

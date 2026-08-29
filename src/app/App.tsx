@@ -5,6 +5,7 @@ import { Home } from './pages/Home';
 import { About } from './pages/About';
 import { Actions } from './pages/Actions';
 import { ActionsSection } from './pages/ActionsSection';
+import { PayerCotisation } from './pages/PayerCotisation';
 import { Guide } from './pages/Guide';
 import { News } from './pages/News';
 import { NewsDetail } from './pages/NewsDetail';
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="about" element={<About />} />
             <Route path="actions" element={<Actions />} />
             <Route path="actions/:section" element={<ActionsSection />} />
+            <Route path="cotisation/:id" element={<PayerCotisation />} />
             <Route path="guide" element={<Guide />} />
             <Route path="news" element={<News />} />
             <Route path="news/:id" element={<NewsDetail />} />
