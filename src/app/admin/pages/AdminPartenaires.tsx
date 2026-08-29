@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Pencil, Trash2, ExternalLink } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, ExternalLink, Eye, Mail, Phone, MapPin, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import type { Partenaire, StatutPartenaire, TypePartenaire, NiveauPartenariat } from '../types';
@@ -93,8 +93,12 @@ export function AdminPartenaires() {
   const [partenaires, setPartenaires] = useState<Partenaire[] | null>(null);
   const [filter, setFilter] = useState<FilterTab>('tous');
   const [editing, setEditing] = useState<Partenaire | 'new' | null>(null);
+  const [viewing, setViewing] = useState<Partenaire | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm());
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
+  const [sortKey, setSortKey] = useState<'nom' | 'type' | 'statut'>('nom');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   async function load() {
     try {
@@ -114,11 +118,40 @@ export function AdminPartenaires() {
     load();
   }, []);
 
+  function toggleSort(key: 'nom' | 'type' | 'statut') {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  }
+
   const filtered = useMemo(() => {
     if (!partenaires) return [];
-    if (filter === 'tous') return partenaires;
-    return partenaires.filter((p) => p.statut === filter);
-  }, [partenaires, filter]);
+    let list = filter === 'tous' ? partenaires : partenaires.filter((p) => p.statut === filter);
+
+    const q = search.trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (p) =>
+          p.nom.toLowerCase().includes(q) ||
+          (p.secteur_activite || '').toLowerCase().includes(q) ||
+          (p.ville || '').toLowerCase().includes(q) ||
+          (p.pays || '').toLowerCase().includes(q)
+      );
+    }
+
+    const sorted = [...list].sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === 'nom') cmp = a.nom.localeCompare(b.nom);
+      else if (sortKey === 'type') cmp = (a.type || '').localeCompare(b.type || '');
+      else cmp = a.statut.localeCompare(b.statut);
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+
+    return sorted;
+  }, [partenaires, filter, search, sortKey, sortDir]);
 
   function openCreate() {
     setForm(emptyForm());
@@ -210,13 +243,25 @@ export function AdminPartenaires() {
         )}
       </div>
 
-      <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterTab)} className="mb-5">
-        <TabsList>
-          <TabsTrigger value="tous">Tous</TabsTrigger>
-          <TabsTrigger value="actif">Actifs</TabsTrigger>
-          <TabsTrigger value="inactif">Inactifs</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+        <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterTab)}>
+          <TabsList>
+            <TabsTrigger value="tous">Tous</TabsTrigger>
+            <TabsTrigger value="actif">Actifs</TabsTrigger>
+            <TabsTrigger value="inactif">Inactifs</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <div className="relative sm:w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un partenaire…"
+            className="pl-9"
+          />
+        </div>
+      </div>
 
       {partenaires === null ? (
         <div className="flex items-center gap-2 text-slate-500 text-sm">
@@ -231,16 +276,22 @@ export function AdminPartenaires() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Partenaire</TableHead>
-                <TableHead className="hidden md:table-cell">Type</TableHead>
+                <TableHead>
+                  <SortableHeader label="Partenaire" active={sortKey === 'nom'} dir={sortDir} onClick={() => toggleSort('nom')} />
+                </TableHead>
+                <TableHead className="hidden md:table-cell">
+                  <SortableHeader label="Type" active={sortKey === 'type'} dir={sortDir} onClick={() => toggleSort('type')} />
+                </TableHead>
                 <TableHead className="hidden lg:table-cell">Niveau</TableHead>
-                <TableHead>Statut</TableHead>
+                <TableHead>
+                  <SortableHeader label="Statut" active={sortKey === 'statut'} dir={sortDir} onClick={() => toggleSort('statut')} />
+                </TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((p) => (
-                <TableRow key={p.id}>
+                <TableRow key={p.id} className="cursor-pointer" onClick={() => setViewing(p)}>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="w-8 h-8 rounded-md">
@@ -288,8 +339,11 @@ export function AdminPartenaires() {
                       {p.statut === 'actif' ? 'Actif' : 'Inactif'}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => setViewing(p)}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
                       {canWrite && (
                         <Button variant="ghost" size="icon" onClick={() => openEdit(p)}>
                           <Pencil className="w-4 h-4" />
@@ -313,6 +367,109 @@ export function AdminPartenaires() {
           </Table>
         </div>
       )}
+
+      <Dialog open={!!viewing} onOpenChange={(open) => !open && setViewing(null)}>
+        <DialogContent className="max-w-md">
+          {viewing && (
+            <>
+              <DialogHeader>
+                <div className="flex flex-col items-center text-center gap-3 pt-2">
+                  <Avatar className="w-20 h-20 rounded-xl">
+                    {viewing.logo_url && <AvatarImage src={viewing.logo_url} alt={viewing.nom} />}
+                    <AvatarFallback className="text-xl rounded-xl bg-brand-green-50 text-brand-green-700">
+                      {viewing.nom.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <DialogTitle className="text-lg">{viewing.nom}</DialogTitle>
+                    {viewing.type && <p className="text-sm text-slate-500 mt-0.5">{TYPE_LABELS[viewing.type]}</p>}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant="outline"
+                      className={
+                        viewing.statut === 'actif'
+                          ? 'bg-brand-green-50 text-brand-green-600 border-brand-green-200'
+                          : 'bg-slate-100 text-slate-500 border-slate-200'
+                      }
+                    >
+                      {viewing.statut === 'actif' ? 'Actif' : 'Inactif'}
+                    </Badge>
+                    {viewing.niveau_partenariat && (
+                      <Badge variant="outline" className={NIVEAU_BADGE[viewing.niveau_partenariat]}>
+                        {NIVEAU_LABELS[viewing.niveau_partenariat]}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-4 text-sm">
+                {viewing.description && <p className="text-slate-600 text-center">{viewing.description}</p>}
+
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
+                  {viewing.secteur_activite && (
+                    <div>
+                      <p className="text-slate-400 text-xs">Secteur</p>
+                      <p className="text-slate-700">{viewing.secteur_activite}</p>
+                    </div>
+                  )}
+                  {(viewing.ville || viewing.pays) && (
+                    <div>
+                      <p className="text-slate-400 text-xs flex items-center gap-1">
+                        <MapPin className="w-3 h-3" /> Localisation
+                      </p>
+                      <p className="text-slate-700">{[viewing.ville, viewing.pays].filter(Boolean).join(', ')}</p>
+                    </div>
+                  )}
+                </dl>
+
+                {(viewing.email || viewing.telephone || viewing.site_web) && (
+                  <div className="flex flex-wrap gap-2 justify-center pt-1">
+                    {viewing.site_web && (
+                      <a
+                        href={viewing.site_web}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1.5 text-xs bg-slate-50 hover:bg-slate-100 rounded-lg px-2.5 py-1.5 text-slate-600"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" /> Site web
+                      </a>
+                    )}
+                    {viewing.email && (
+                      <a
+                        href={`mailto:${viewing.email}`}
+                        className="flex items-center gap-1.5 text-xs bg-slate-50 hover:bg-slate-100 rounded-lg px-2.5 py-1.5 text-slate-600"
+                      >
+                        <Mail className="w-3.5 h-3.5" /> {viewing.email}
+                      </a>
+                    )}
+                    {viewing.telephone && (
+                      <span className="flex items-center gap-1.5 text-xs bg-slate-50 rounded-lg px-2.5 py-1.5 text-slate-600">
+                        <Phone className="w-3.5 h-3.5" /> {viewing.telephone}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {canWrite && (
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setViewing(null);
+                      openEdit(viewing);
+                    }}
+                  >
+                    <Pencil className="w-4 h-4" /> Modifier
+                  </Button>
+                </DialogFooter>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
@@ -416,5 +573,28 @@ export function AdminPartenaires() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function SortableHeader({
+  label,
+  active,
+  dir,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  dir: 'asc' | 'desc';
+  onClick: () => void;
+}) {
+  return (
+    <button onClick={onClick} className="flex items-center gap-1 hover:text-slate-900">
+      {label}
+      {active ? (
+        dir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+      ) : (
+        <ArrowUpDown className="w-3 h-3 text-slate-300" />
+      )}
+    </button>
   );
 }
