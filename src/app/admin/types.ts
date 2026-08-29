@@ -80,7 +80,7 @@ export interface Adhesion {
   updated_at: string;
 }
 
-export type StatutCotisation = 'payee' | 'impayee';
+export type StatutCotisation = 'payee' | 'impayee' | 'anterieure_adhesion';
 export type ModePaiement = 'especes' | 'mobile_money' | 'virement' | 'autre';
 
 export interface CotisationMembre {
@@ -89,7 +89,7 @@ export interface CotisationMembre {
   photo_url: string | null;
   mois: string;
   cotisation_id: number | null;
-  montant: number;
+  montant: number | null;
   statut: StatutCotisation;
   date_paiement: string | null;
   mode_paiement: ModePaiement | null;
@@ -253,8 +253,6 @@ export interface Action {
   date_fin: string | null;
   date_evenement: string | null;
   lieu: string | null;
-  date_affichage: string | null;
-  lieu_affichage: string | null;
   objectifs: string[] | null;
   activites_cles: string[] | null;
   resultats: string[] | null;

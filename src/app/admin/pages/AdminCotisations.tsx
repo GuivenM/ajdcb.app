@@ -286,10 +286,16 @@ export function AdminCotisations() {
                       className={
                         l.statut === 'payee'
                           ? 'bg-brand-green-50 text-brand-green-600 border-brand-green-200'
+                          : l.statut === 'anterieure_adhesion'
+                          ? 'bg-slate-100 text-slate-500 border-slate-200'
                           : 'bg-brand-red-50 text-brand-red-600 border-brand-red-200'
                       }
                     >
-                      {l.statut === 'payee' ? 'À jour' : 'En retard'}
+                      {l.statut === 'payee'
+                        ? 'À jour'
+                        : l.statut === 'anterieure_adhesion'
+                        ? 'Pas encore membre'
+                        : 'En retard'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -427,16 +433,22 @@ export function AdminCotisations() {
                     className={`rounded-lg border px-3 py-2 text-center ${
                       e.statut === 'payee'
                         ? 'bg-brand-green-50 border-brand-green-200'
+                        : e.statut === 'anterieure_adhesion'
+                        ? 'bg-slate-50 border-slate-200'
                         : 'bg-brand-red-50 border-brand-red-200'
                     }`}
                   >
                     <p className="text-[11px] text-slate-500 capitalize">{moisLabel(e.mois).split(' ')[0]}</p>
                     <p
                       className={`text-xs font-semibold mt-0.5 ${
-                        e.statut === 'payee' ? 'text-brand-green-600' : 'text-brand-red-600'
+                        e.statut === 'payee'
+                          ? 'text-brand-green-600'
+                          : e.statut === 'anterieure_adhesion'
+                          ? 'text-slate-400'
+                          : 'text-brand-red-600'
                       }`}
                     >
-                      {e.statut === 'payee' ? 'Payé' : 'Impayé'}
+                      {e.statut === 'payee' ? 'Payé' : e.statut === 'anterieure_adhesion' ? '—' : 'Impayé'}
                     </p>
                   </div>
                 ))}
