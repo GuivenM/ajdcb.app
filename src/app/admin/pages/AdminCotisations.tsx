@@ -1,6 +1,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Check, X, History, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
-import { api, ApiError } from '../../../lib/api';
+import {
+  Loader2,
+  Check,
+  X,
+  History,
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
+  Download,
+} from 'lucide-react';
+import { api, ApiError, downloadFile } from '../../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import type {
   CotisationMembre,
@@ -76,6 +89,10 @@ export function AdminCotisations() {
   const [lignes, setLignes] = useState<CotisationMembre[] | null>(null);
   const [stats, setStats] = useState<CotisationStats | null>(null);
   const [filter, setFilter] = useState<FilterTab>('tous');
+  const [search, setSearch] = useState('');
+  const [sortKey, setSortKey] = useState<'nom' | 'statut'>('nom');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [exporting, setExporting] = useState(false);
 
   const [paiementTarget, setPaiementTarget] = useState<CotisationMembre | null>(null);
   const [datePaiement, setDatePaiement] = useState('');
@@ -109,12 +126,50 @@ export function AdminCotisations() {
     load(mois);
   }, [mois]);
 
+  function toggleSort(key: 'nom' | 'statut') {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  }
+
   const filtered = useMemo(() => {
     if (!lignes) return [];
-    if (filter === 'tous') return lignes;
-    if (filter === 'a_jour') return lignes.filter((l) => l.statut === 'payee');
-    return lignes.filter((l) => l.statut === 'impayee');
-  }, [lignes, filter]);
+    let list =
+      filter === 'tous'
+        ? lignes
+        : filter === 'a_jour'
+        ? lignes.filter((l) => l.statut === 'payee')
+        : lignes.filter((l) => l.statut === 'impayee');
+
+    const q = search.trim().toLowerCase();
+    if (q) {
+      list = list.filter((l) => l.nom_complet.toLowerCase().includes(q));
+    }
+
+    const sorted = [...list].sort((a, b) => {
+      const cmp =
+        sortKey === 'nom'
+          ? a.nom_complet.localeCompare(b.nom_complet)
+          : a.statut.localeCompare(b.statut);
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+
+    return sorted;
+  }, [lignes, filter, search, sortKey, sortDir]);
+
+  async function exportCsv() {
+    setExporting(true);
+    try {
+      await downloadFile(`/v1/cotisations/export?mois=${mois}&statut=${filter}`);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Impossible d'exporter les cotisations.");
+    } finally {
+      setExporting(false);
+    }
+  }
 
   function openPaiement(l: CotisationMembre) {
     setPaiementTarget(l);
@@ -231,13 +286,31 @@ export function AdminCotisations() {
         </div>
       </div>
 
-      <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterTab)} className="mb-5">
-        <TabsList>
-          <TabsTrigger value="tous">Tous</TabsTrigger>
-          <TabsTrigger value="a_jour">À jour</TabsTrigger>
-          <TabsTrigger value="en_retard">En retard</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+        <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterTab)}>
+          <TabsList>
+            <TabsTrigger value="tous">Tous</TabsTrigger>
+            <TabsTrigger value="a_jour">À jour</TabsTrigger>
+            <TabsTrigger value="en_retard">En retard</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <div className="flex items-center gap-2">
+          <div className="relative sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Rechercher un membre…"
+              className="pl-9"
+            />
+          </div>
+          <Button variant="outline" onClick={exportCsv} disabled={exporting}>
+            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            Exporter
+          </Button>
+        </div>
+      </div>
 
       {lignes === null ? (
         <div className="flex items-center gap-2 text-slate-500 text-sm">
@@ -252,9 +325,13 @@ export function AdminCotisations() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Membre</TableHead>
+                <TableHead>
+                  <SortableHeader label="Membre" active={sortKey === 'nom'} dir={sortDir} onClick={() => toggleSort('nom')} />
+                </TableHead>
                 <TableHead className="hidden md:table-cell">Paiement</TableHead>
-                <TableHead>Statut</TableHead>
+                <TableHead>
+                  <SortableHeader label="Statut" active={sortKey === 'statut'} dir={sortDir} onClick={() => toggleSort('statut')} />
+                </TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -458,5 +535,28 @@ export function AdminCotisations() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function SortableHeader({
+  label,
+  active,
+  dir,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  dir: 'asc' | 'desc';
+  onClick: () => void;
+}) {
+  return (
+    <button onClick={onClick} className="flex items-center gap-1 hover:text-slate-900">
+      {label}
+      {active ? (
+        dir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+      ) : (
+        <ArrowUpDown className="w-3 h-3 text-slate-300" />
+      )}
+    </button>
   );
 }

@@ -76,6 +76,43 @@ async function request<T>(
   return (body?.data ?? (body as unknown)) as T;
 }
 
+// Téléchargement de fichier (export CSV, etc.) — la réponse n'est pas du JSON,
+// donc on bypasse `request()` et on déclenche directement le téléchargement
+// dans le navigateur à partir du blob reçu.
+export async function downloadFile(path: string, filenameFallback = 'export.csv') {
+  const token = getToken();
+  const res = await fetch(`${API_URL}${path}`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  if (!res.ok) {
+    let message = `Erreur ${res.status}`;
+    try {
+      const body = await res.json();
+      message = body?.message || message;
+    } catch {
+      // pas de corps JSON (ex: erreur serveur brute) — on garde le message par défaut
+    }
+    throw new ApiError(message, res.status);
+  }
+
+  const disposition = res.headers.get('Content-Disposition') || '';
+  const match = disposition.match(/filename="?([^"]+)"?/);
+  const filename = match?.[1] || filenameFallback;
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 export const api = {
   get: <T,>(path: string) => request<T>(path, { method: 'GET' }),
   post: <T,>(path: string, data?: unknown) =>

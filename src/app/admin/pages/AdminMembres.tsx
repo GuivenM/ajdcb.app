@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Pencil, Trash2, UserX, UserCheck, Eye, MessageCircle, Facebook, Instagram, Linkedin, Twitter, Search, ArrowUp, ArrowDown, ArrowUpDown, Link2 } from 'lucide-react';
-import { api, ApiError } from '../../../lib/api';
+import { Loader2, Plus, Pencil, Trash2, UserX, UserCheck, Eye, MessageCircle, Facebook, Instagram, Linkedin, Twitter, Search, ArrowUp, ArrowDown, ArrowUpDown, Link2, Download } from 'lucide-react';
+import { api, ApiError, downloadFile } from '../../../lib/api';
 import { compressImage } from '../../../lib/compressImage';
 import { useAuth } from '../../context/AuthContext';
 import type { Membre, StatutMembre } from '../types';
@@ -97,6 +97,18 @@ export function AdminMembres() {
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<'nom' | 'role' | 'statut'>('nom');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [exporting, setExporting] = useState(false);
+
+  async function exportCsv() {
+    setExporting(true);
+    try {
+      await downloadFile(`/v1/membres-admin/export?statut=${filter}`);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Impossible d'exporter les membres.");
+    } finally {
+      setExporting(false);
+    }
+  }
 
   useEffect(() => {
     load();
@@ -248,14 +260,20 @@ export function AdminMembres() {
           </TabsList>
         </Tabs>
 
-        <div className="relative sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher un membre…"
-            className="pl-9"
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Rechercher un membre…"
+              className="pl-9"
+            />
+          </div>
+          <Button variant="outline" onClick={exportCsv} disabled={exporting}>
+            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            Exporter
+          </Button>
         </div>
       </div>
 
