@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Loader2, Plus, Pencil, Trash2, UserX, UserCheck, Eye, MessageCircle, Facebook, Instagram, Linkedin, Twitter, Search, ArrowUp, ArrowDown, ArrowUpDown, Link2 } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
+import { compressImage } from '../../../lib/compressImage';
 import { useAuth } from '../../context/AuthContext';
 import type { Membre, StatutMembre } from '../types';
 import { Button } from '../../components/ui/button';
@@ -518,7 +519,11 @@ export function AdminMembres() {
                 id="photo"
                 type="file"
                 accept="image/jpeg,image/png,image/jpg"
-                onChange={(e) => setForm((f) => ({ ...f, photoFile: e.target.files?.[0] || null }))}
+                onChange={async (e) => {
+                  const raw = e.target.files?.[0] || null;
+                  const photoFile = raw ? await compressImage(raw) : null;
+                  setForm((f) => ({ ...f, photoFile }));
+                }}
               />
             </div>
 

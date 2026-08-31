@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Check, X, Trash2, Eye, FileText, Download } from 'lucide-react';
+import { Loader2, Check, X, Trash2, Eye, FileText, Download, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import type { Adhesion, StatutAdhesion } from '../types';
@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
+import { Input } from '../../components/ui/input';
 import {
   Table,
   TableBody,
@@ -63,6 +64,9 @@ export function AdminAdhesions() {
 
   const [adhesions, setAdhesions] = useState<Adhesion[] | null>(null);
   const [filter, setFilter] = useState<FilterTab>('tous');
+  const [search, setSearch] = useState('');
+  const [sortKey, setSortKey] = useState<'nom' | 'ville' | 'statut'>('nom');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [selected, setSelected] = useState<Adhesion | null>(null);
   const [commentaire, setCommentaire] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -80,11 +84,40 @@ export function AdminAdhesions() {
     load();
   }, []);
 
+  function toggleSort(key: 'nom' | 'ville' | 'statut') {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  }
+
   const filtered = useMemo(() => {
     if (!adhesions) return [];
-    if (filter === 'tous') return adhesions;
-    return adhesions.filter((a) => a.statut === filter);
-  }, [adhesions, filter]);
+    let list = filter === 'tous' ? adhesions : adhesions.filter((a) => a.statut === filter);
+
+    const q = search.trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (a) =>
+          `${a.prenom} ${a.nom}`.toLowerCase().includes(q) ||
+          a.email.toLowerCase().includes(q) ||
+          (a.ville || '').toLowerCase().includes(q) ||
+          (a.profession || '').toLowerCase().includes(q)
+      );
+    }
+
+    const sorted = [...list].sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === 'nom') cmp = `${a.prenom} ${a.nom}`.localeCompare(`${b.prenom} ${b.nom}`);
+      else if (sortKey === 'ville') cmp = (a.ville || '').localeCompare(b.ville || '');
+      else cmp = a.statut.localeCompare(b.statut);
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+
+    return sorted;
+  }, [adhesions, filter, search, sortKey, sortDir]);
 
   function openDetail(a: Adhesion) {
     setSelected(a);
@@ -130,14 +163,26 @@ export function AdminAdhesions() {
         </div>
       </div>
 
-      <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterTab)} className="mb-5">
-        <TabsList>
-          <TabsTrigger value="tous">Toutes</TabsTrigger>
-          <TabsTrigger value="en_attente">En attente</TabsTrigger>
-          <TabsTrigger value="approuvee">Approuvées</TabsTrigger>
-          <TabsTrigger value="rejetee">Rejetées</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+        <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterTab)}>
+          <TabsList>
+            <TabsTrigger value="tous">Toutes</TabsTrigger>
+            <TabsTrigger value="en_attente">En attente</TabsTrigger>
+            <TabsTrigger value="approuvee">Approuvées</TabsTrigger>
+            <TabsTrigger value="rejetee">Rejetées</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <div className="relative sm:w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher une demande…"
+            className="pl-9"
+          />
+        </div>
+      </div>
 
       {adhesions === null ? (
         <div className="flex items-center gap-2 text-slate-500 text-sm">
@@ -152,10 +197,16 @@ export function AdminAdhesions() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Candidat</TableHead>
-                <TableHead className="hidden md:table-cell">Ville</TableHead>
+                <TableHead>
+                  <SortableHeader label="Candidat" active={sortKey === 'nom'} dir={sortDir} onClick={() => toggleSort('nom')} />
+                </TableHead>
+                <TableHead className="hidden md:table-cell">
+                  <SortableHeader label="Ville" active={sortKey === 'ville'} dir={sortDir} onClick={() => toggleSort('ville')} />
+                </TableHead>
                 <TableHead className="hidden md:table-cell">Profession</TableHead>
-                <TableHead>Statut</TableHead>
+                <TableHead>
+                  <SortableHeader label="Statut" active={sortKey === 'statut'} dir={sortDir} onClick={() => toggleSort('statut')} />
+                </TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -425,5 +476,28 @@ function DocLinks({ docs }: { docs: { label: string; url: string | null }[] }) {
         </a>
       ))}
     </div>
+  );
+}
+
+function SortableHeader({
+  label,
+  active,
+  dir,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  dir: 'asc' | 'desc';
+  onClick: () => void;
+}) {
+  return (
+    <button onClick={onClick} className="flex items-center gap-1 hover:text-slate-900">
+      {label}
+      {active ? (
+        dir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+      ) : (
+        <ArrowUpDown className="w-3 h-3 text-slate-300" />
+      )}
+    </button>
   );
 }

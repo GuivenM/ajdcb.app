@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Loader2, Plus, Pencil, Trash2, Eye, Calendar, MapPin, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
+import { compressImage } from '../../../lib/compressImage';
 import { useAuth } from '../../context/AuthContext';
 import type { Action, StatutAction, SectionAction } from '../types';
 import { Button } from '../../components/ui/button';
@@ -455,7 +456,16 @@ export function AdminActions() {
 
             <div className="space-y-1.5">
               <Label htmlFor="image">Image</Label>
-              <Input id="image" type="file" accept="image/jpeg,image/png,image/jpg" onChange={(e) => setForm((f) => ({ ...f, imageFile: e.target.files?.[0] || null }))} />
+              <Input
+                id="image"
+                type="file"
+                accept="image/jpeg,image/png,image/jpg"
+                onChange={async (e) => {
+                  const raw = e.target.files?.[0] || null;
+                  const imageFile = raw ? await compressImage(raw) : null;
+                  setForm((f) => ({ ...f, imageFile }));
+                }}
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-3">

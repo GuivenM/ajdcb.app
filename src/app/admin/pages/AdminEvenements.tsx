@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Loader2, Plus, Pencil, Trash2, MapPin, Users, Eye, Calendar, Clock, Ticket, Phone, Mail as MailIcon, User as UserIcon } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
+import { compressImage } from '../../../lib/compressImage';
 import { useAuth } from '../../context/AuthContext';
 import type { Evenement, StatutEvenement } from '../types';
 import { Button } from '../../components/ui/button';
@@ -462,7 +463,11 @@ export function AdminEvenements() {
                 id="image"
                 type="file"
                 accept="image/jpeg,image/png,image/jpg"
-                onChange={(e) => setForm((f) => ({ ...f, imageFile: e.target.files?.[0] || null }))}
+                onChange={async (e) => {
+                  const raw = e.target.files?.[0] || null;
+                  const imageFile = raw ? await compressImage(raw) : null;
+                  setForm((f) => ({ ...f, imageFile }));
+                }}
               />
             </div>
 
