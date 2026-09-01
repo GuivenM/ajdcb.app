@@ -182,12 +182,14 @@ export function Dashboard() {
               icon={UserPlus}
               title="Adhésions"
               stat={`${data.adhesionsTotal} demande${data.adhesionsTotal > 1 ? 's' : ''} au total`}
+              badge={data.adhesionsEnAttente}
             />
             <ModuleCard
               to="/admin/messages"
               icon={Mail}
               title="Messages"
               stat={`${data.messagesTotal} message${data.messagesTotal > 1 ? 's' : ''} reçu${data.messagesTotal > 1 ? 's' : ''}`}
+              badge={data.messagesNonLus}
             />
             <ModuleCard
               to="/admin/membres"
@@ -200,6 +202,7 @@ export function Dashboard() {
               icon={Wallet}
               title="Cotisations"
               stat={`${data.cotisationsTauxAJour}% à jour ce mois`}
+              badge={data.cotisationsEnRetard}
             />
             <ModuleCard
               to="/admin/evenements"
@@ -271,17 +274,24 @@ function ModuleCard({
   icon: Icon,
   title,
   stat,
+  badge,
 }: {
   to: string;
   icon: React.ComponentType<{ className?: string }>;
   title: string;
   stat: string;
+  badge?: number;
 }) {
   return (
     <Link
       to={to}
-      className="bg-white border border-brand-green-100 rounded-xl p-5 hover:border-brand-green-300 transition-colors group flex items-start justify-between gap-3"
+      className="relative bg-white border border-brand-green-100 rounded-xl p-5 hover:border-brand-green-300 transition-colors group flex items-start justify-between gap-3"
     >
+      {!!badge && badge > 0 && (
+        <span className="absolute -top-2 -right-2 min-w-[22px] h-[22px] px-1.5 rounded-full bg-brand-red-600 text-white text-[11px] font-bold flex items-center justify-center leading-none shadow-sm">
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
       <div className="flex items-start gap-3">
         <div className="w-8 h-8 rounded-md bg-brand-green-50 flex items-center justify-center shrink-0">
           <Icon className="w-4 h-4 text-brand-green-600" />
