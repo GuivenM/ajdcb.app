@@ -1,8 +1,16 @@
 import React from 'react';
-import { Outlet, useNavigate, Link } from 'react-router-dom';
-import { LogOut, AlertTriangle } from 'lucide-react';
+import { Outlet, useNavigate, Link, NavLink } from 'react-router-dom';
+import { LogOut, AlertTriangle, LayoutDashboard, Wallet, CalendarDays, UserCircle } from 'lucide-react';
 import { useMemberAuth } from '../context/MemberAuthContext';
 import { Button } from '../components/ui/button';
+import { cn } from '../components/Navbar';
+
+const navItems = [
+  { label: 'Tableau de bord', path: '/membre', icon: LayoutDashboard, end: true },
+  { label: 'Mes cotisations', path: '/membre/cotisations', icon: Wallet },
+  { label: 'Événements', path: '/membre/evenements', icon: CalendarDays },
+  { label: 'Mon profil', path: '/membre/profil', icon: UserCircle },
+];
 
 export function MemberLayout() {
   const { membre, logout } = useMemberAuth();
@@ -31,6 +39,26 @@ export function MemberLayout() {
             <LogOut className="w-4 h-4" /> Déconnexion
           </Button>
         </div>
+
+        <nav className="max-w-5xl mx-auto px-4 flex gap-1 overflow-x-auto">
+          {navItems.map(({ label, path, icon: Icon, end }) => (
+            <NavLink
+              key={path}
+              to={path}
+              end={end}
+              className={({ isActive }) =>
+                cn(
+                  'flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors',
+                  isActive
+                    ? 'border-brand-green-600 text-brand-green-700'
+                    : 'border-transparent text-slate-500 hover:text-slate-900'
+                )
+              }
+            >
+              <Icon className="w-4 h-4" /> {label}
+            </NavLink>
+          ))}
+        </nav>
       </header>
 
       {membre?.en_attente_paiement && (

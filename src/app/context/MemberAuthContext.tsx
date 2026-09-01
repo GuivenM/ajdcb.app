@@ -8,6 +8,11 @@ export interface MembreUser {
   nom_complet: string;
   email: string;
   photo: string | null;
+  whatsapp: string | null;
+  facebook: string | null;
+  instagram: string | null;
+  linkedin: string | null;
+  twitter: string | null;
   poste: string | null;
   commission: string | null;
   role: string;

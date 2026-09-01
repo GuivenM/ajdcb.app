@@ -32,6 +32,9 @@ import { ActivationCompte } from './member/ActivationCompte';
 import { MemberLayout } from './member/MemberLayout';
 import { MemberProtectedRoute } from './member/MemberProtectedRoute';
 import { MemberDashboard } from './member/MemberDashboard';
+import { MemberCotisations } from './member/MemberCotisations';
+import { MemberEvenements } from './member/MemberEvenements';
+import { MemberProfil } from './member/MemberProfil';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -86,6 +89,9 @@ export default function App() {
           <Route element={<MemberProtectedRoute />}>
             <Route path="/membre" element={<MemberLayout />}>
               <Route index element={<MemberDashboard />} />
+              <Route path="cotisations" element={<MemberCotisations />} />
+              <Route path="evenements" element={<MemberEvenements />} />
+              <Route path="profil" element={<MemberProfil />} />
             </Route>
           </Route>
         </Routes>
