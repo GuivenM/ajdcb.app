@@ -149,6 +149,11 @@ export interface Evenement {
 export type StatutActualite = 'publie' | 'brouillon';
 export type TypeActualite = 'actualite' | 'evenement' | 'education' | 'culture';
 
+export interface ActualitePhoto {
+  id: number;
+  url: string;
+}
+
 export interface Actualite {
   id: number;
   titre: string;
@@ -157,12 +162,16 @@ export interface Actualite {
   contenu: string;
   image: string | null;
   image_url: string | null;
+  photos: ActualitePhoto[];
+  photos_urls: string[];
   type: TypeActualite;
   type_label: string;
   date_evenement: string | null;
   lieu_evenement: string | null;
   auteur: string;
   statut: StatutActualite;
+  facebook_post_url: string | null;
+  lien_public: string;
   created_at: string;
   updated_at: string;
 }

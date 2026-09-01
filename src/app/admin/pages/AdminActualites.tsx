@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Pencil, Trash2, Eye, Calendar, MapPin, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, Eye, Calendar, MapPin, Search, ArrowUp, ArrowDown, ArrowUpDown, MessageCircle, Facebook, Share2, X, ImagePlus, Download } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
 import { compressImage } from '../../../lib/compressImage';
 import { useAuth } from '../../context/AuthContext';
@@ -61,7 +61,9 @@ interface FormState {
   dateEvenement: string;
   lieuEvenement: string;
   statut: StatutActualite;
-  imageFile: File | null;
+  photosExistantes: { id: number; url: string }[];
+  photosSupprimees: number[];
+  nouvellesPhotos: File[];
 }
 
 function emptyForm(): FormState {
@@ -73,7 +75,9 @@ function emptyForm(): FormState {
     dateEvenement: '',
     lieuEvenement: '',
     statut: 'brouillon',
-    imageFile: null,
+    photosExistantes: [],
+    photosSupprimees: [],
+    nouvellesPhotos: [],
   };
 }
 
@@ -92,6 +96,8 @@ export function AdminActualites() {
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<'titre' | 'type' | 'created_at' | 'statut'>('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [facebookConfigure, setFacebookConfigure] = useState(false);
+  const [partageId, setPartageId] = useState<number | null>(null);
 
   async function load() {
     try {
@@ -104,7 +110,35 @@ export function AdminActualites() {
 
   useEffect(() => {
     load();
+    api
+      .get<{ facebook_configure: boolean }>('/v1/actualites/partage-config')
+      .then((c) => setFacebookConfigure(c.facebook_configure))
+      .catch(() => setFacebookConfigure(false));
   }, []);
+
+  function lienWhatsapp(a: Actualite) {
+    const extraitContenu = a.contenu.length > 300 ? a.contenu.slice(0, 300).trimEnd() + '…' : a.contenu;
+    const mentionPhotos = a.photos_urls.length > 1 ? `\n📸 ${a.photos_urls.length} photos à voir sur le lien.` : '';
+    const texte = `*${a.titre}*\n\n${a.description}\n\n${extraitContenu}${mentionPhotos}\n\n${a.lien_public}`;
+    return `https://wa.me/?text=${encodeURIComponent(texte)}`;
+  }
+
+  function lienPartageFacebookManuel(a: Actualite) {
+    return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(a.lien_public)}`;
+  }
+
+  async function publierSurFacebook(a: Actualite) {
+    setPartageId(a.id);
+    try {
+      const updated = await api.post<Actualite>(`/v1/actualites/${a.id}/partager-facebook`);
+      setActualites((prev) => prev?.map((x) => (x.id === updated.id ? updated : x)) ?? null);
+      toast.success('Actualité publiée sur la Page Facebook.');
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Échec de la publication Facebook.');
+    } finally {
+      setPartageId(null);
+    }
+  }
 
   function toggleSort(key: 'titre' | 'type' | 'created_at' | 'statut') {
     if (sortKey === key) {
@@ -155,7 +189,9 @@ export function AdminActualites() {
       dateEvenement: a.date_evenement ? a.date_evenement.slice(0, 10) : '',
       lieuEvenement: a.lieu_evenement || '',
       statut: a.statut,
-      imageFile: null,
+      photosExistantes: a.photos,
+      photosSupprimees: [],
+      nouvellesPhotos: [],
     });
     setEditing(a);
   }
@@ -169,7 +205,8 @@ export function AdminActualites() {
     if (form.dateEvenement) fd.append('date_evenement', form.dateEvenement);
     if (form.lieuEvenement) fd.append('lieu_evenement', form.lieuEvenement);
     fd.append('statut', form.statut);
-    if (form.imageFile) fd.append('image', form.imageFile);
+    form.nouvellesPhotos.forEach((f) => fd.append('photos[]', f));
+    form.photosSupprimees.forEach((id) => fd.append('photos_supprimees[]', String(id)));
     return fd;
   }
 
@@ -294,6 +331,48 @@ export function AdminActualites() {
                       <Button variant="ghost" size="icon" onClick={() => setViewing(a)}>
                         <Eye className="w-4 h-4" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Envoyer sur WhatsApp"
+                        onClick={() => window.open(lienWhatsapp(a), '_blank', 'noopener')}
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                      </Button>
+                      {a.facebook_post_url ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Voir le post Facebook"
+                          className="text-brand-green-600"
+                          onClick={() => window.open(a.facebook_post_url!, '_blank', 'noopener')}
+                        >
+                          <Facebook className="w-4 h-4" />
+                        </Button>
+                      ) : facebookConfigure ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Publier sur Facebook"
+                          disabled={partageId === a.id}
+                          onClick={() => publierSurFacebook(a)}
+                        >
+                          {partageId === a.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Facebook className="w-4 h-4" />
+                          )}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Partager sur Facebook"
+                          onClick={() => window.open(lienPartageFacebookManuel(a), '_blank', 'noopener')}
+                        >
+                          <Share2 className="w-4 h-4" />
+                        </Button>
+                      )}
                       {canEdit && (
                         <Button variant="ghost" size="icon" onClick={() => openEdit(a)}>
                           <Pencil className="w-4 h-4" />
@@ -322,12 +401,25 @@ export function AdminActualites() {
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           {viewing && (
             <>
-              {viewing.image_url && (
-                <img
-                  src={viewing.image_url}
-                  alt={viewing.titre}
-                  className="w-full h-44 object-cover rounded-xl -mt-2"
-                />
+              {viewing.photos_urls.length > 0 && (
+                <div className="grid grid-cols-4 gap-1.5 -mt-2">
+                  {viewing.photos_urls.map((url, i) => (
+                    <a
+                      key={i}
+                      href={url}
+                      download
+                      target="_blank"
+                      rel="noopener"
+                      title="Enregistrer cette photo (pour l'attacher manuellement sur WhatsApp)"
+                      className="relative aspect-square rounded-lg overflow-hidden bg-slate-100 group"
+                    >
+                      <img src={url} alt="" className="w-full h-full object-cover" />
+                      <span className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Download className="w-4 h-4 text-white" />
+                      </span>
+                    </a>
+                  ))}
+                </div>
               )}
               <DialogHeader>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -370,8 +462,43 @@ export function AdminActualites() {
                 </div>
               </div>
 
-              {canEdit && (
-                <DialogFooter>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(lienWhatsapp(viewing), '_blank', 'noopener')}
+                >
+                  <MessageCircle className="w-4 h-4" /> WhatsApp
+                </Button>
+                {viewing.facebook_post_url ? (
+                  <Button
+                    variant="outline"
+                    className="text-brand-green-600"
+                    onClick={() => window.open(viewing.facebook_post_url!, '_blank', 'noopener')}
+                  >
+                    <Facebook className="w-4 h-4" /> Voir sur Facebook
+                  </Button>
+                ) : facebookConfigure ? (
+                  <Button
+                    variant="outline"
+                    disabled={partageId === viewing.id}
+                    onClick={() => publierSurFacebook(viewing)}
+                  >
+                    {partageId === viewing.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Facebook className="w-4 h-4" />
+                    )}
+                    Publier sur Facebook
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={() => window.open(lienPartageFacebookManuel(viewing), '_blank', 'noopener')}
+                  >
+                    <Share2 className="w-4 h-4" /> Partager sur Facebook
+                  </Button>
+                )}
+                {canEdit && (
                   <Button
                     variant="outline"
                     onClick={() => {
@@ -381,8 +508,8 @@ export function AdminActualites() {
                   >
                     <Pencil className="w-4 h-4" /> Modifier
                   </Button>
-                </DialogFooter>
-              )}
+                )}
+              </DialogFooter>
             </>
           )}
         </DialogContent>
@@ -426,15 +553,78 @@ export function AdminActualites() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="image">Image</Label>
+              <Label>Photos</Label>
+              <p className="text-xs text-slate-500">
+                La 1ère photo sert de couverture. Utilisées telles quelles pour le post Facebook natif.
+              </p>
+
+              {(form.photosExistantes.length > 0 || form.nouvellesPhotos.length > 0) && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {form.photosExistantes.map((p) => {
+                    const marqueeSupprimee = form.photosSupprimees.includes(p.id);
+                    return (
+                      <div
+                        key={`existante-${p.id}`}
+                        className={`relative w-20 h-20 rounded-lg overflow-hidden border ${marqueeSupprimee ? 'opacity-30 border-brand-red-300' : 'border-slate-200'}`}
+                      >
+                        <img src={p.url} alt="" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          className="absolute top-0.5 right-0.5 bg-black/60 rounded-full p-0.5 text-white"
+                          onClick={() =>
+                            setForm((f) => ({
+                              ...f,
+                              photosSupprimees: marqueeSupprimee
+                                ? f.photosSupprimees.filter((id) => id !== p.id)
+                                : [...f.photosSupprimees, p.id],
+                            }))
+                          }
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                  {form.nouvellesPhotos.map((f, i) => (
+                    <div key={`nouvelle-${i}`} className="relative w-20 h-20 rounded-lg overflow-hidden border border-brand-green-300">
+                      <img src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        className="absolute top-0.5 right-0.5 bg-black/60 rounded-full p-0.5 text-white"
+                        onClick={() =>
+                          setForm((form2) => ({
+                            ...form2,
+                            nouvellesPhotos: form2.nouvellesPhotos.filter((_, idx) => idx !== i),
+                          }))
+                        }
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <label
+                htmlFor="photos"
+                className="flex items-center gap-2 justify-center border-2 border-dashed border-slate-300 rounded-lg py-3 text-sm text-slate-500 hover:border-slate-400 cursor-pointer"
+              >
+                <ImagePlus className="w-4 h-4" /> Ajouter des photos
+              </label>
               <Input
-                id="image"
+                id="photos"
                 type="file"
+                multiple
                 accept="image/jpeg,image/png,image/jpg"
+                className="hidden"
                 onChange={async (e) => {
-                  const raw = e.target.files?.[0] || null;
-                  const imageFile = raw ? await compressImage(raw) : null;
-                  setForm((f) => ({ ...f, imageFile }));
+                  const fichiers = Array.from(e.target.files || []);
+                  const compressees = await Promise.all(fichiers.map((f) => compressImage(f)));
+                  setForm((f) => ({
+                    ...f,
+                    nouvellesPhotos: [...f.nouvellesPhotos, ...compressees],
+                  }));
+                  e.target.value = '';
                 }}
               />
             </div>
