@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../components/Navbar';
+import { NotificationBell } from './components/NotificationBell';
+import { useAdminNotifications } from './hooks/useAdminNotifications';
 
 interface NavItem {
   label: string;
@@ -42,6 +44,12 @@ export function AdminLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { adhesionsEnAttente, messagesNonLus, loading, items, total } = useAdminNotifications();
+
+  const navBadges: Record<string, number> = {
+    '/admin/adhesions': adhesionsEnAttente,
+    '/admin/messages': messagesNonLus,
+  };
 
   async function handleLogout() {
     await logout();
@@ -84,15 +92,22 @@ export function AdminLayout() {
               onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium transition-colors border-l-2',
+                  'flex items-center justify-between gap-3 px-3 py-2 rounded-md text-[13px] font-medium transition-colors border-l-2',
                   isActive
                     ? 'bg-white/[0.06] text-white border-brand-green-500'
                     : 'text-slate-400 border-transparent hover:bg-white/[0.04] hover:text-white'
                 )
               }
             >
-              <Icon className="w-4 h-4" />
-              {label}
+              <span className="flex items-center gap-3">
+                <Icon className="w-4 h-4" />
+                {label}
+              </span>
+              {!!navBadges[path] && (
+                <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-brand-red-600 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+                  {navBadges[path] > 99 ? '99+' : navBadges[path]}
+                </span>
+              )}
             </NavLink>
           )
         )}
@@ -147,7 +162,11 @@ export function AdminLayout() {
             <Menu className="w-6 h-6" />
           </button>
           <span className="text-white font-bold text-sm">AJDCB Admin</span>
-          <div className="w-6" />
+          <NotificationBell dark loading={loading} items={items} total={total} />
+        </header>
+
+        <header className="hidden lg:flex items-center justify-end px-6 h-16 bg-white border-b border-brand-green-100 sticky top-0 z-30">
+          <NotificationBell loading={loading} items={items} total={total} />
         </header>
 
         <main className="p-4 sm:p-6 lg:p-8">
