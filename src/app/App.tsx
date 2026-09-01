@@ -13,6 +13,7 @@ import { Join } from './pages/Join';
 import { Contact } from './pages/Contact';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './context/AuthContext';
+import { MemberAuthProvider } from './context/MemberAuthContext';
 import { AdminLogin } from './admin/AdminLogin';
 import { AdminLayout } from './admin/AdminLayout';
 import { ProtectedRoute } from './admin/ProtectedRoute';
@@ -26,6 +27,11 @@ import { AdminActualites } from './admin/pages/AdminActualites';
 import { AdminGuide } from './admin/pages/AdminGuide';
 import { AdminPartenaires } from './admin/pages/AdminPartenaires';
 import { AdminActions } from './admin/pages/AdminActions';
+import { MemberLogin } from './member/MemberLogin';
+import { ActivationCompte } from './member/ActivationCompte';
+import { MemberLayout } from './member/MemberLayout';
+import { MemberProtectedRoute } from './member/MemberProtectedRoute';
+import { MemberDashboard } from './member/MemberDashboard';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -42,6 +48,7 @@ export default function App() {
     <BrowserRouter>
       <ScrollToTop />
       <AuthProvider>
+      <MemberAuthProvider>
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
@@ -72,7 +79,17 @@ export default function App() {
               <Route path="actions" element={<AdminActions />} />
             </Route>
           </Route>
+
+          <Route path="/membre/login" element={<MemberLogin />} />
+          <Route path="/activer-compte" element={<ActivationCompte />} />
+
+          <Route element={<MemberProtectedRoute />}>
+            <Route path="/membre" element={<MemberLayout />}>
+              <Route index element={<MemberDashboard />} />
+            </Route>
+          </Route>
         </Routes>
+      </MemberAuthProvider>
       </AuthProvider>
       <Toaster position="top-right" richColors />
     </BrowserRouter>
