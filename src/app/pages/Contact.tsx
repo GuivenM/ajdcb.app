@@ -12,13 +12,21 @@ interface ContactForm {
   telephone: string;
   objet: 'question' | 'partenariat' | 'adhesion' | 'urgence' | 'autre';
   message: string;
+  organisation: string;
+  type_organisation: '' | 'institution' | 'ong' | 'entreprise' | 'media' | 'universite' | 'association';
+  secteur_activite: string;
+  pays: string;
+  ville: string;
+  site_web: string;
 }
 
 export function Contact() {
   const [loading, setLoading] = useState(false);
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<ContactForm>({
+  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<ContactForm>({
     defaultValues: { objet: 'question' },
   });
+  const objet = watch('objet');
+  const estPartenariat = objet === 'partenariat';
 
   const onSubmit = async (data: ContactForm) => {
     setLoading(true);
@@ -109,6 +117,60 @@ export function Contact() {
                   <option value="autre">Autre</option>
                 </select>
               </div>
+
+              {estPartenariat && (
+                <div className="space-y-6 bg-white/60 rounded-2xl p-5 -mx-1">
+                  <p className="text-sm text-slate-500">
+                    Quelques informations sur votre structure, pour que notre équipe traite votre demande plus vite.
+                  </p>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-900 ml-1">Nom de l'organisation</label>
+                    <input
+                      type="text"
+                      className="w-full px-6 py-4 rounded-xl border border-transparent bg-white focus:ring-2 focus:ring-brand-green-500 transition-all outline-none"
+                      placeholder="Nom de votre structure"
+                      {...register('organisation', { required: estPartenariat })}
+                    />
+                    {errors.organisation && <span className="text-red-500 text-xs ml-1">Requis</span>}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-slate-900 ml-1">Type de structure</label>
+                      <select className="w-full px-6 py-4 rounded-xl border border-transparent bg-white focus:ring-2 focus:ring-brand-green-500 transition-all outline-none" {...register('type_organisation')}>
+                        <option value="">Sélectionner…</option>
+                        <option value="institution">Institution</option>
+                        <option value="ong">ONG</option>
+                        <option value="entreprise">Entreprise</option>
+                        <option value="media">Média</option>
+                        <option value="universite">Université/École</option>
+                        <option value="association">Association</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-slate-900 ml-1">Secteur d'activité</label>
+                      <input type="text" className="w-full px-6 py-4 rounded-xl border border-transparent bg-white focus:ring-2 focus:ring-brand-green-500 transition-all outline-none" placeholder="Ex. Éducation, Santé…" {...register('secteur_activite')} />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-slate-900 ml-1">Pays</label>
+                      <input type="text" className="w-full px-6 py-4 rounded-xl border border-transparent bg-white focus:ring-2 focus:ring-brand-green-500 transition-all outline-none" placeholder="Bénin" {...register('pays')} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-slate-900 ml-1">Ville</label>
+                      <input type="text" className="w-full px-6 py-4 rounded-xl border border-transparent bg-white focus:ring-2 focus:ring-brand-green-500 transition-all outline-none" placeholder="Cotonou" {...register('ville')} />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-900 ml-1">Site web</label>
+                    <input type="text" className="w-full px-6 py-4 rounded-xl border border-transparent bg-white focus:ring-2 focus:ring-brand-green-500 transition-all outline-none" placeholder="https://…" {...register('site_web')} />
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                  <label className="text-sm font-bold text-slate-900 ml-1">Message</label>
