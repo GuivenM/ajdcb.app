@@ -836,6 +836,11 @@ function PartenaireForm({ onBack }: { onBack: () => void }) {
   const [prenom, setPrenom] = useState('');
   const [nom, setNom] = useState('');
   const [organisation, setOrganisation] = useState('');
+  const [typeOrganisation, setTypeOrganisation] = useState('');
+  const [secteurActivite, setSecteurActivite] = useState('');
+  const [pays, setPays] = useState('');
+  const [ville, setVille] = useState('');
+  const [siteWeb, setSiteWeb] = useState('');
   const [email, setEmail] = useState('');
   const [telephone, setTelephone] = useState('');
   const [message, setMessage] = useState('');
@@ -844,19 +849,22 @@ function PartenaireForm({ onBack }: { onBack: () => void }) {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!prenom.trim() || !nom.trim() || !email.trim() || !telephone.trim() || !message.trim()) {
+    if (!prenom.trim() || !nom.trim() || !organisation.trim() || !email.trim() || !telephone.trim() || !message.trim()) {
       toast.error('Merci de compléter tous les champs.');
       return;
     }
     setSubmitting(true);
     try {
-      const texte = organisation.trim()
-        ? `Organisation : ${organisation.trim()}\n\n${message.trim()}`
-        : message.trim();
       await api.post('/v1/messages', {
         prenom, nom, email, telephone,
         objet: 'partenariat',
-        message: texte,
+        message: message.trim(),
+        organisation: organisation.trim(),
+        type_organisation: typeOrganisation || undefined,
+        secteur_activite: secteurActivite.trim() || undefined,
+        pays: pays.trim() || undefined,
+        ville: ville.trim() || undefined,
+        site_web: siteWeb.trim() || undefined,
       });
       setSubmitted(true);
     } catch (err) {
@@ -906,8 +914,39 @@ function PartenaireForm({ onBack }: { onBack: () => void }) {
               <Input value={nom} onChange={(e) => setNom(e.target.value)} />
             </Field>
           </div>
-          <Field label="Organisation / entreprise (optionnel)">
+          <Field label="Nom de l'organisation">
             <Input value={organisation} onChange={(e) => setOrganisation(e.target.value)} />
+          </Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Type de structure">
+              <Select value={typeOrganisation} onValueChange={setTypeOrganisation}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner…" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="institution">Institution</SelectItem>
+                  <SelectItem value="ong">ONG</SelectItem>
+                  <SelectItem value="entreprise">Entreprise</SelectItem>
+                  <SelectItem value="media">Média</SelectItem>
+                  <SelectItem value="universite">Université/École</SelectItem>
+                  <SelectItem value="association">Association</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Secteur d'activité">
+              <Input value={secteurActivite} onChange={(e) => setSecteurActivite(e.target.value)} placeholder="Ex. Éducation, Santé…" />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Pays">
+              <Input value={pays} onChange={(e) => setPays(e.target.value)} placeholder="Bénin" />
+            </Field>
+            <Field label="Ville">
+              <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Cotonou" />
+            </Field>
+          </div>
+          <Field label="Site web (optionnel)">
+            <Input value={siteWeb} onChange={(e) => setSiteWeb(e.target.value)} placeholder="https://…" />
           </Field>
           <Field label="Email">
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
