@@ -309,11 +309,18 @@ export interface Message {
   telephone: string;
   objet: ObjetMessage;
   message: string;
+  organisation: string | null;
+  type_organisation: TypePartenaire | null;
+  secteur_activite: string | null;
+  pays: string | null;
+  ville: string | null;
+  site_web: string | null;
   reponse: string | null;
   date_reponse: string | null;
   statut: StatutMessage;
   lu_le: string | null;
   traite_par: number | null;
+  partenaire_id: number | null;
   created_at: string;
   updated_at: string;
 }

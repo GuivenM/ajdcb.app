@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Trash2, Eye, Send, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { Loader2, Trash2, Eye, Send, Search, ArrowUp, ArrowDown, ArrowUpDown, UserPlus, CheckCircle2 } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
 import { useAuth } from '../../context/AuthContext';
-import type { Message, StatutMessage, ObjetMessage } from '../types';
+import type { Message, StatutMessage, ObjetMessage, Partenaire } from '../types';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
@@ -47,6 +47,15 @@ const OBJET_LABELS: Record<ObjetMessage, string> = {
   autre: 'Autre',
 };
 
+const TYPE_ORGANISATION_LABELS: Record<string, string> = {
+  institution: 'Institution',
+  ong: 'ONG',
+  entreprise: 'Entreprise',
+  media: 'Média',
+  universite: 'Université/École',
+  association: 'Association',
+};
+
 type FilterTab = 'tous' | StatutMessage;
 
 export function AdminMessages() {
@@ -59,6 +68,7 @@ export function AdminMessages() {
   const [selected, setSelected] = useState<Message | null>(null);
   const [reponse, setReponse] = useState('');
   const [sending, setSending] = useState(false);
+  const [converting, setConverting] = useState(false);
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<'contact' | 'objet' | 'created_at' | 'statut'>('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -142,6 +152,22 @@ export function AdminMessages() {
       toast.error(err instanceof ApiError ? err.message : "Erreur lors de l'envoi.");
     } finally {
       setSending(false);
+    }
+  }
+
+  async function convertirEnPartenaire() {
+    if (!selected) return;
+    setConverting(true);
+    try {
+      const partenaire = await api.post<Partenaire>(`/v1/messages/${selected.id}/creer-partenaire`);
+      const updated = { ...selected, partenaire_id: partenaire.id };
+      setMessages((prev) => prev?.map((x) => (x.id === updated.id ? updated : x)) ?? null);
+      setSelected(updated);
+      toast.success('Partenaire créé (statut inactif) — à activer depuis la page Partenaires.');
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Erreur lors de la création du partenaire.');
+    } finally {
+      setConverting(false);
     }
   }
 
@@ -287,6 +313,72 @@ export function AdminMessages() {
                     <p className="text-slate-700">{selected.telephone}</p>
                   </div>
                 </dl>
+
+                {selected.objet === 'partenariat' && selected.organisation && (
+                  <div className="bg-slate-50 rounded-xl p-3 space-y-2">
+                    <p className="text-slate-400 text-xs font-medium">Organisation</p>
+                    <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
+                      <div>
+                        <p className="text-slate-400 text-xs">Nom</p>
+                        <p className="text-slate-700">{selected.organisation}</p>
+                      </div>
+                      {selected.type_organisation && (
+                        <div>
+                          <p className="text-slate-400 text-xs">Type</p>
+                          <p className="text-slate-700">{TYPE_ORGANISATION_LABELS[selected.type_organisation]}</p>
+                        </div>
+                      )}
+                      {selected.secteur_activite && (
+                        <div>
+                          <p className="text-slate-400 text-xs">Secteur</p>
+                          <p className="text-slate-700">{selected.secteur_activite}</p>
+                        </div>
+                      )}
+                      {(selected.ville || selected.pays) && (
+                        <div>
+                          <p className="text-slate-400 text-xs">Localisation</p>
+                          <p className="text-slate-700">
+                            {[selected.ville, selected.pays].filter(Boolean).join(', ')}
+                          </p>
+                        </div>
+                      )}
+                      {selected.site_web && (
+                        <div className="col-span-2">
+                          <p className="text-slate-400 text-xs">Site web</p>
+                          <a
+                            href={selected.site_web}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-brand-green-700 hover:underline break-all"
+                          >
+                            {selected.site_web}
+                          </a>
+                        </div>
+                      )}
+                    </dl>
+
+                    {canReply &&
+                      (selected.partenaire_id ? (
+                        <p className="flex items-center gap-1.5 text-sm text-brand-green-700 font-medium pt-1">
+                          <CheckCircle2 className="w-4 h-4" /> Déjà ajouté comme partenaire
+                        </p>
+                      ) : (
+                        <Button
+                          size="sm"
+                          disabled={converting}
+                          onClick={convertirEnPartenaire}
+                          className="bg-brand-green-600 hover:bg-brand-green-700 mt-1"
+                        >
+                          {converting ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <UserPlus className="w-4 h-4" />
+                          )}
+                          Ajouter comme partenaire
+                        </Button>
+                      ))}
+                  </div>
+                )}
 
                 <div>
                   <p className="text-slate-400 text-xs mb-1">Message</p>
