@@ -110,7 +110,7 @@ export function PayerCotisation() {
               montant={montantTotal}
               label="Payer ma cotisation"
               className="w-full"
-              defaultValues={{
+              payeur={{
                 nom_payeur: `${membre.prenom} ${membre.nom}`,
                 telephone_payeur: membre.whatsapp || '',
               }}
