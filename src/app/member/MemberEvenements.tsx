@@ -139,7 +139,7 @@ export function MemberEvenements() {
                       montant={ev.prix as number}
                       devise={ev.devise || 'XOF'}
                       label="Réserver ma place"
-                      defaultValues={{
+                      payeur={{
                         nom_payeur: membre.nom_complet,
                         telephone_payeur: membre.whatsapp || '',
                       }}

@@ -128,7 +128,7 @@ export function MemberCotisations() {
               extraPayload={{ membre_id: membre.id, mois: moisSelectionnes }}
               montant={montantTotal}
               label="Payer"
-              defaultValues={{
+              payeur={{
                 nom_payeur: membre.nom_complet,
                 telephone_payeur: membre.whatsapp || '',
               }}
