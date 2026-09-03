@@ -6,12 +6,14 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { api, ApiError } from '../../lib/api';
 import { Actualite } from '../admin/types';
 
-const stats = [
-  { label: "Membres Actifs", value: "500+" },
-  { label: "Années d'Actions", value: "10+" },
-  { label: "Partenaires", value: "25+" },
-  { label: "Vies Impactées", value: "10k+" },
-];
+// "Membres Actifs" et "Partenaires" sont calculés en direct via l'API
+// (voir useEffect plus bas). "Années d'Actions" et "Vies Impactées" n'ont pas
+// d'équivalent mesurable dans l'app — modifie les valeurs ci-dessous à la main
+// quand tu as les vrais chiffres.
+const STATS_EDITORIALES = {
+  anneesActions: "10+",
+  viesImpactees: "10k+",
+};
 
 const axes = [
   {
@@ -47,6 +49,7 @@ const axes = [
 export function Home() {
   const [actualites, setActualites] = useState<Actualite[]>([]);
   const [loadingActualites, setLoadingActualites] = useState(true);
+  const [stats, setStats] = useState<{ membres_actifs: number; partenaires_actifs: number } | null>(null);
 
   useEffect(() => {
     api
@@ -56,6 +59,15 @@ export function Home() {
         if (!(err instanceof ApiError)) console.error(err);
       })
       .finally(() => setLoadingActualites(false));
+  }, []);
+
+  useEffect(() => {
+    api
+      .get<{ membres_actifs: number; partenaires_actifs: number }>('/v1/statistiques-publiques')
+      .then(setStats)
+      .catch((err) => {
+        if (!(err instanceof ApiError)) console.error(err);
+      });
   }, []);
 
   return (
@@ -140,12 +152,26 @@ export function Home() {
           className="hidden lg:block absolute bottom-12 right-12 bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl max-w-sm"
         >
           <div className="grid grid-cols-2 gap-6">
-            {stats.map((stat, i) => (
-              <div key={i}>
-                <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
-                <div className="text-xs text-slate-400 uppercase tracking-wide">{stat.label}</div>
+            <div>
+              <div className="text-3xl font-bold text-white mb-1">
+                {stats ? stats.membres_actifs : <Loader2 className="w-6 h-6 animate-spin" />}
               </div>
-            ))}
+              <div className="text-xs text-slate-400 uppercase tracking-wide">Membres Actifs</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-white mb-1">{STATS_EDITORIALES.anneesActions}</div>
+              <div className="text-xs text-slate-400 uppercase tracking-wide">Années d'Actions</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-white mb-1">
+                {stats ? stats.partenaires_actifs : <Loader2 className="w-6 h-6 animate-spin" />}
+              </div>
+              <div className="text-xs text-slate-400 uppercase tracking-wide">Partenaires</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-white mb-1">{STATS_EDITORIALES.viesImpactees}</div>
+              <div className="text-xs text-slate-400 uppercase tracking-wide">Vies Impactées</div>
+            </div>
           </div>
         </motion.div>
       </section>
