@@ -15,7 +15,7 @@ import {
   Menu,
   X,
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, AdminRole } from '../context/AuthContext';
 import { cn } from '../components/Navbar';
 import { NotificationBell } from './components/NotificationBell';
 import { useAdminNotifications } from './hooks/useAdminNotifications';
@@ -25,26 +25,34 @@ interface NavItem {
   path: string;
   icon: React.ComponentType<{ className?: string }>;
   comingSoon?: boolean;
+  // Rôles autorisés à voir cet item dans le menu. Omis = tous les rôles staff standards.
+  roles?: AdminRole[];
 }
 
+const STAFF_ROLES: AdminRole[] = ['super_admin', 'admin', 'moderateur'];
+
 const navItems: NavItem[] = [
-  { label: 'Tableau de bord', path: '/admin', icon: LayoutDashboard },
-  { label: 'Adhésions', path: '/admin/adhesions', icon: UserPlus },
-  { label: 'Messages', path: '/admin/messages', icon: Mail },
-  { label: 'Actualités', path: '/admin/actualites', icon: Newspaper },
-  { label: 'Actions', path: '/admin/actions', icon: Activity },
-  { label: 'Membres', path: '/admin/membres', icon: Users },
-  { label: 'Cotisations', path: '/admin/cotisations', icon: Wallet },
-  { label: 'Événements', path: '/admin/evenements', icon: CalendarDays },
-  { label: 'Guide', path: '/admin/guide', icon: BookOpen },
-  { label: 'Partenaires', path: '/admin/partenaires', icon: Handshake },
+  { label: 'Tableau de bord', path: '/admin', icon: LayoutDashboard, roles: ['super_admin', 'admin', 'moderateur', 'tresorier'] },
+  { label: 'Adhésions', path: '/admin/adhesions', icon: UserPlus, roles: STAFF_ROLES },
+  { label: 'Messages', path: '/admin/messages', icon: Mail, roles: STAFF_ROLES },
+  { label: 'Actualités', path: '/admin/actualites', icon: Newspaper, roles: STAFF_ROLES },
+  { label: 'Actions', path: '/admin/actions', icon: Activity, roles: STAFF_ROLES },
+  { label: 'Membres', path: '/admin/membres', icon: Users, roles: STAFF_ROLES },
+  // Cotisations : réservé aux rôles ayant besoin des données financières.
+  // Le moderateur ne le voit plus (il n'en a jamais eu l'usage), le tresorier l'a.
+  { label: 'Cotisations', path: '/admin/cotisations', icon: Wallet, roles: ['super_admin', 'admin', 'tresorier'] },
+  { label: 'Événements', path: '/admin/evenements', icon: CalendarDays, roles: STAFF_ROLES },
+  { label: 'Guide', path: '/admin/guide', icon: BookOpen, roles: STAFF_ROLES },
+  { label: 'Partenaires', path: '/admin/partenaires', icon: Handshake, roles: STAFF_ROLES },
 ];
 
 export function AdminLayout() {
-  const { user, logout } = useAuth();
+  const { user, logout, hasRole } = useAuth();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { adhesionsEnAttente, messagesNonLus, loading, items, total } = useAdminNotifications();
+
+  const visibleNavItems = navItems.filter((item) => !item.roles || hasRole(...item.roles));
 
   const navBadges: Record<string, number> = {
     '/admin/adhesions': adhesionsEnAttente,
@@ -69,7 +77,7 @@ export function AdminLayout() {
       </div>
 
       <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-        {navItems.map(({ label, path, icon: Icon, comingSoon }) =>
+        {visibleNavItems.map(({ label, path, icon: Icon, comingSoon }) =>
           comingSoon ? (
             <div
               key={path}

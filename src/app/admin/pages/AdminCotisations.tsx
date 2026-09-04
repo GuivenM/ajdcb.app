@@ -83,7 +83,7 @@ type FilterTab = 'tous' | 'a_jour' | 'en_retard';
 
 export function AdminCotisations() {
   const { hasRole } = useAuth();
-  const canWrite = hasRole('super_admin', 'admin');
+  const canWrite = hasRole('super_admin', 'admin', 'tresorier');
 
   const [mois, setMois] = useState(() => new Date().toISOString().slice(0, 7));
   const [lignes, setLignes] = useState<CotisationMembre[] | null>(null);
