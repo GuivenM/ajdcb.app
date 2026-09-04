@@ -289,7 +289,7 @@ export function AdminActions() {
             <TableBody>
               {filtered.map((a) => (
                 <TableRow key={a.id} className="cursor-pointer" onClick={() => setViewing(a)}>
-                  <TableCell>
+                  <TableCell className="max-w-[320px]">
                     <div className="font-medium text-slate-900 line-clamp-1">{a.titre}</div>
                     <div className="text-xs text-slate-400 line-clamp-1">{a.description}</div>
                   </TableCell>

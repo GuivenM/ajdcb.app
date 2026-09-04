@@ -26,7 +26,7 @@ export function ActionsSection() {
     setError(null);
     api
       .get<Action[]>(`/v1/actions/section/${section}`)
-      .then((data) => setActions(data.filter((a) => a.statut === 'actif')))
+      .then((data) => setActions(data.filter((a) => a.statut !== 'inactif')))
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Erreur de chargement'))
       .finally(() => setLoading(false));
   }, [section]);

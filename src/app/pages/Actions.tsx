@@ -49,8 +49,8 @@ export function Actions() {
 
   useEffect(() => {
     api
-      .get<Action[]>('/v1/actions?statut=actif')
-      .then(setActions)
+      .get<Action[]>('/v1/actions')
+      .then((data) => setActions(data.filter((a) => a.statut !== 'inactif')))
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Erreur de chargement'))
       .finally(() => setLoading(false));
   }, []);
