@@ -74,7 +74,9 @@ export default function App() {
               <Route path="adhesions" element={<AdminAdhesions />} />
               <Route path="messages" element={<AdminMessages />} />
               <Route path="membres" element={<AdminMembres />} />
-              <Route path="cotisations" element={<AdminCotisations />} />
+              <Route element={<ProtectedRoute roles={['super_admin', 'admin', 'tresorier']} />}>
+                <Route path="cotisations" element={<AdminCotisations />} />
+              </Route>
               <Route path="evenements" element={<AdminEvenements />} />
               <Route path="actualites" element={<AdminActualites />} />
               <Route path="guide" element={<AdminGuide />} />

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api, ApiError, getToken, setToken } from '../../lib/api';
 
-export type AdminRole = 'super_admin' | 'admin' | 'moderateur';
+export type AdminRole = 'super_admin' | 'admin' | 'moderateur' | 'tresorier';
 
 export interface AdminUser {
   id: number;
