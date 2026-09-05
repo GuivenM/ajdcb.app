@@ -14,6 +14,7 @@ import {
   LogOut,
   Menu,
   X,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth, AdminRole } from '../context/AuthContext';
 import { cn } from '../components/Navbar';
@@ -44,6 +45,7 @@ const navItems: NavItem[] = [
   { label: 'Événements', path: '/admin/evenements', icon: CalendarDays, roles: STAFF_ROLES },
   { label: 'Guide', path: '/admin/guide', icon: BookOpen, roles: STAFF_ROLES },
   { label: 'Partenaires', path: '/admin/partenaires', icon: Handshake, roles: STAFF_ROLES },
+  { label: 'Utilisateurs', path: '/admin/utilisateurs', icon: ShieldCheck, roles: ['super_admin'] },
 ];
 
 export function AdminLayout() {

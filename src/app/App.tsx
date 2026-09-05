@@ -28,6 +28,7 @@ import { AdminActualites } from './admin/pages/AdminActualites';
 import { AdminGuide } from './admin/pages/AdminGuide';
 import { AdminPartenaires } from './admin/pages/AdminPartenaires';
 import { AdminActions } from './admin/pages/AdminActions';
+import { AdminUtilisateurs } from './admin/pages/AdminUtilisateurs';
 import { MemberLogin } from './member/MemberLogin';
 import { ActivationCompte } from './member/ActivationCompte';
 import { MemberLayout } from './member/MemberLayout';
@@ -84,6 +85,9 @@ export default function App() {
               <Route path="guide" element={<AdminGuide />} />
               <Route path="partenaires" element={<AdminPartenaires />} />
               <Route path="actions" element={<AdminActions />} />
+              <Route element={<ProtectedRoute roles={['super_admin']} />}>
+                <Route path="utilisateurs" element={<AdminUtilisateurs />} />
+              </Route>
             </Route>
           </Route>
 
