@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Pencil, Trash2, UserX, UserCheck, Eye, MessageCircle, Facebook, Instagram, Linkedin, Twitter, Search, ArrowUp, ArrowDown, ArrowUpDown, Link2, Download } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, UserX, UserCheck, Eye, MessageCircle, Facebook, Instagram, Linkedin, Twitter, Search, ArrowUp, ArrowDown, ArrowUpDown, Link2, Download, KeyRound } from 'lucide-react';
 import { api, ApiError, downloadFile } from '../../../lib/api';
 import { compressImage } from '../../../lib/compressImage';
 import { useAuth } from '../../context/AuthContext';
@@ -68,6 +68,8 @@ export function AdminMembres() {
   const { hasRole } = useAuth();
   const canWrite = hasRole('super_admin', 'admin');
   const canDelete = hasRole('super_admin');
+  const canCreerAcces = hasRole('super_admin');
+  const [creatingAccesId, setCreatingAccesId] = useState<number | null>(null);
 
   const [membres, setMembres] = useState<Membre[] | null>(null);
   const [postes, setPostes] = useState<string[]>([]);
@@ -234,6 +236,20 @@ export function AdminMembres() {
     }
   }
 
+  async function creerAccesAdmin(m: Membre) {
+    if (!confirm(`Créer un accès administrateur pour ${m.prenom} ${m.nom} (${m.poste}) ? Un email d'activation lui sera envoyé.`)) return;
+    setCreatingAccesId(m.id);
+    try {
+      const res = await api.post<{ email: string; role_label: string }>(`/v1/membres/${m.id}/creer-acces-admin`, {});
+      setMembres((prev) => prev?.map((x) => (x.id === m.id ? { ...x, a_compte_admin: true } : x)) ?? null);
+      toast.success(`Accès ${res.role_label} créé, email envoyé à ${res.email}.`);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Impossible de créer l'accès admin.");
+    } finally {
+      setCreatingAccesId(null);
+    }
+  }
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -348,6 +364,21 @@ export function AdminMembres() {
                           }}
                         >
                           <Link2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {canCreerAcces && m.peut_avoir_acces_admin && !m.a_compte_admin && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Créer un accès admin pour ce membre"
+                          disabled={creatingAccesId === m.id}
+                          onClick={() => creerAccesAdmin(m)}
+                        >
+                          {creatingAccesId === m.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <KeyRound className="w-4 h-4" />
+                          )}
                         </Button>
                       )}
                       {canWrite && (

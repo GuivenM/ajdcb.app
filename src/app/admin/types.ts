@@ -289,6 +289,8 @@ export interface Membre {
   commission: string | null;
   role: string;
   statut: StatutMembre;
+  peut_avoir_acces_admin: boolean;
+  a_compte_admin: boolean;
   created_at: string;
   updated_at: string;
 }

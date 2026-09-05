@@ -15,6 +15,7 @@ import { Toaster } from 'sonner';
 import { AuthProvider } from './context/AuthContext';
 import { MemberAuthProvider } from './context/MemberAuthContext';
 import { AdminLogin } from './admin/AdminLogin';
+import { ActivationCompteAdmin } from './admin/ActivationCompteAdmin';
 import { AdminLayout } from './admin/AdminLayout';
 import { ProtectedRoute } from './admin/ProtectedRoute';
 import { Dashboard } from './admin/Dashboard';
@@ -67,6 +68,7 @@ export default function App() {
           </Route>
 
           <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/activer-compte" element={<ActivationCompteAdmin />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/admin" element={<AdminLayout />}>
