@@ -28,6 +28,7 @@ interface AuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string, remember?: boolean) => Promise<void>;
+  activerCompte: (token: string, password: string, passwordConfirmation: string) => Promise<void>;
   logout: () => Promise<void>;
   hasRole: (...roles: AdminRole[]) => boolean;
 }
@@ -69,6 +70,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setPermissions(data.permissions);
   }, []);
 
+  const activerCompte = useCallback(
+    async (token: string, password: string, passwordConfirmation: string) => {
+      const data = await api.post<LoginResponse>('/auth/activer-compte-admin', {
+        token,
+        password,
+        password_confirmation: passwordConfirmation,
+      });
+      setToken(data.token);
+      setUser(data.user);
+      setPermissions(data.permissions);
+    },
+    []
+  );
+
   const logout = useCallback(async () => {
     try {
       await api.post('/v1/auth/logout');
@@ -89,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, permissions, isLoading, isAuthenticated: !!user, login, logout, hasRole }}
+      value={{ user, permissions, isLoading, isAuthenticated: !!user, login, activerCompte, logout, hasRole }}
     >
       {children}
     </AuthContext.Provider>
