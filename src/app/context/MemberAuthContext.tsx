@@ -32,6 +32,7 @@ interface MemberAuthContextValue {
   isAuthenticated: boolean;
   login: (email: string, password: string, remember?: boolean) => Promise<void>;
   activerCompte: (token: string, password: string, passwordConfirmation: string) => Promise<void>;
+  motDePasseOublie: (email: string) => Promise<string>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -85,6 +86,11 @@ export function MemberAuthProvider({ children }: { children: React.ReactNode }) 
     []
   );
 
+  const motDePasseOublie = useCallback(async (email: string) => {
+    const data = await membreApi.post<{ message: string }>('/v1/membre/auth/mot-de-passe-oublie', { email });
+    return data.message;
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await membreApi.post('/v1/membre/auth/logout');
@@ -105,6 +111,7 @@ export function MemberAuthProvider({ children }: { children: React.ReactNode }) 
         isAuthenticated: !!membre,
         login,
         activerCompte,
+        motDePasseOublie,
         logout,
         refresh: loadMe,
       }}

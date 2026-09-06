@@ -29,6 +29,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   login: (email: string, password: string, remember?: boolean) => Promise<void>;
   activerCompte: (token: string, password: string, passwordConfirmation: string) => Promise<void>;
+  motDePasseOublie: (email: string) => Promise<string>;
   logout: () => Promise<void>;
   hasRole: (...roles: AdminRole[]) => boolean;
 }
@@ -84,6 +85,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  const motDePasseOublie = useCallback(async (email: string) => {
+    const data = await api.post<{ message: string }>('/auth/mot-de-passe-oublie', { email });
+    return data.message;
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await api.post('/v1/auth/logout');
@@ -104,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, permissions, isLoading, isAuthenticated: !!user, login, activerCompte, logout, hasRole }}
+      value={{ user, permissions, isLoading, isAuthenticated: !!user, login, activerCompte, motDePasseOublie, logout, hasRole }}
     >
       {children}
     </AuthContext.Provider>
