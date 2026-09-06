@@ -171,6 +171,27 @@ export function AdminCotisations() {
     }
   }
 
+  const [verifying, setVerifying] = useState(false);
+
+  async function verifierRetards() {
+    if (
+      !confirm(
+        'Envoyer les rappels/avertissements et radier automatiquement les membres à 3 mois consécutifs impayés (Article 3) ?'
+      )
+    )
+      return;
+    setVerifying(true);
+    try {
+      const res = await api.post<{ detail: string }>('/v1/cotisations/verifier-retards', {});
+      toast.success(res.detail || 'Vérification effectuée.');
+      load(mois);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Impossible de lancer la vérification.');
+    } finally {
+      setVerifying(false);
+    }
+  }
+
   function openPaiement(l: CotisationMembre) {
     setPaiementTarget(l);
     setDatePaiement(l.date_paiement || new Date().toISOString().slice(0, 10));
@@ -309,6 +330,12 @@ export function AdminCotisations() {
             {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             Exporter
           </Button>
+          {hasRole('super_admin', 'tresorier') && (
+            <Button variant="outline" onClick={verifierRetards} disabled={verifying} title="Envoyer les rappels et radier automatiquement les membres à 3 mois consécutifs impayés">
+              {verifying ? <Loader2 className="w-4 h-4 animate-spin" /> : <AlertTriangle className="w-4 h-4" />}
+              Vérifier les retards
+            </Button>
+          )}
         </div>
       </div>
 
