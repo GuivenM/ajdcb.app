@@ -16,6 +16,7 @@ import { AuthProvider } from './context/AuthContext';
 import { MemberAuthProvider } from './context/MemberAuthContext';
 import { AdminLogin } from './admin/AdminLogin';
 import { ActivationCompteAdmin } from './admin/ActivationCompteAdmin';
+import { MotDePasseOublie } from './admin/MotDePasseOublie';
 import { AdminLayout } from './admin/AdminLayout';
 import { ProtectedRoute } from './admin/ProtectedRoute';
 import { Dashboard } from './admin/Dashboard';
@@ -30,6 +31,7 @@ import { AdminPartenaires } from './admin/pages/AdminPartenaires';
 import { AdminActions } from './admin/pages/AdminActions';
 import { AdminUtilisateurs } from './admin/pages/AdminUtilisateurs';
 import { MemberLogin } from './member/MemberLogin';
+import { MotDePasseOublieMembre } from './member/MotDePasseOublieMembre';
 import { ActivationCompte } from './member/ActivationCompte';
 import { MemberLayout } from './member/MemberLayout';
 import { MemberProtectedRoute } from './member/MemberProtectedRoute';
@@ -70,6 +72,7 @@ export default function App() {
 
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/activer-compte" element={<ActivationCompteAdmin />} />
+          <Route path="/admin/mot-de-passe-oublie" element={<MotDePasseOublie />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/admin" element={<AdminLayout />}>
@@ -92,6 +95,7 @@ export default function App() {
           </Route>
 
           <Route path="/membre/login" element={<MemberLogin />} />
+          <Route path="/mot-de-passe-oublie" element={<MotDePasseOublieMembre />} />
           <Route path="/activer-compte" element={<ActivationCompte />} />
 
           <Route element={<MemberProtectedRoute />}>

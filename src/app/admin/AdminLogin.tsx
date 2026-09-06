@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate, Link } from 'react-router-dom';
 import { Lock, Mail, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../../lib/api';
@@ -103,6 +103,12 @@ export function AdminLogin() {
               />
               Rester connecté 7 jours
             </label>
+
+            <div className="text-right -mt-1">
+              <Link to="/admin/mot-de-passe-oublie" className="text-sm text-brand-green-600 hover:underline">
+                Mot de passe oublié ?
+              </Link>
+            </div>
 
             <Button type="submit" disabled={loading} className="w-full bg-brand-green-600 hover:bg-brand-green-700">
               {loading ? (

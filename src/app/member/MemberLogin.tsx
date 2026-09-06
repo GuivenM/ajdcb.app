@@ -106,6 +106,12 @@ export function MemberLogin() {
               Rester connecté 30 jours
             </label>
 
+            <div className="text-right -mt-1">
+              <Link to="/mot-de-passe-oublie" className="text-sm text-brand-green-600 hover:underline">
+                Mot de passe oublié ?
+              </Link>
+            </div>
+
             <Button type="submit" disabled={loading} className="w-full bg-brand-green-600 hover:bg-brand-green-700">
               {loading ? (
                 <>
