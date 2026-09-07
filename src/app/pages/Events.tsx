@@ -4,6 +4,7 @@ import { Calendar, MapPin, Loader2 } from 'lucide-react';
 import { api, ApiError } from '../../lib/api';
 import { Evenement } from '../admin/types';
 import { FedaPayButton } from '../components/FedaPayButton';
+import { Zoomable } from '../components/Zoomable';
 
 export function Events() {
   const [evenements, setEvenements] = useState<Evenement[]>([]);
@@ -55,7 +56,7 @@ export function Events() {
               >
                 <div className="h-48 bg-slate-200 relative overflow-hidden">
                   {evt.image_url ? (
-                    <img src={evt.image_url} alt={evt.titre} className="w-full h-full object-cover" />
+                    <Zoomable src={evt.image_url} alt={evt.titre} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400">
                       <Calendar size={40} />

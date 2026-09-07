@@ -4,6 +4,7 @@ import { Loader2, CheckCircle2 } from 'lucide-react';
 import { api, ApiError } from '../../lib/api';
 import { Membre } from '../admin/types';
 import { FedaPayButton } from '../components/FedaPayButton';
+import { Zoomable } from '../components/Zoomable';
 
 const MONTANT_COTISATION = 1000;
 
@@ -69,7 +70,7 @@ export function PayerCotisation() {
         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 text-center">
           <div className="w-16 h-16 rounded-full bg-brand-green-100 mx-auto mb-4 overflow-hidden flex items-center justify-center text-brand-green-700 font-bold text-xl">
             {membre.photo_url ? (
-              <img src={membre.photo_url} alt={membre.nom} className="w-full h-full object-cover" />
+              <Zoomable src={membre.photo_url} alt={membre.nom} className="w-full h-full object-cover" />
             ) : (
               <span>{membre.prenom?.[0]}{membre.nom?.[0]}</span>
             )}

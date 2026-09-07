@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Pencil, Trash2, Eye, Calendar, MapPin, Search, ArrowUp, ArrowDown, ArrowUpDown, MessageCircle, Facebook, Share2, X, ImagePlus, Download } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, Eye, Calendar, MapPin, Search, ArrowUp, ArrowDown, ArrowUpDown, MessageCircle, Facebook, Share2, X, ImagePlus } from 'lucide-react';
+import { Zoomable } from '../../components/Zoomable';
 import { api, ApiError } from '../../../lib/api';
 import { compressImage } from '../../../lib/compressImage';
 import { useAuth } from '../../context/AuthContext';
@@ -404,20 +405,14 @@ export function AdminActualites() {
               {viewing.photos_urls.length > 0 && (
                 <div className="grid grid-cols-4 gap-1.5 -mt-2">
                   {viewing.photos_urls.map((url, i) => (
-                    <a
-                      key={i}
-                      href={url}
-                      download
-                      target="_blank"
-                      rel="noopener"
-                      title="Enregistrer cette photo (pour l'attacher manuellement sur WhatsApp)"
-                      className="relative aspect-square rounded-lg overflow-hidden bg-slate-100 group"
-                    >
-                      <img src={url} alt="" className="w-full h-full object-cover" />
-                      <span className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Download className="w-4 h-4 text-white" />
-                      </span>
-                    </a>
+                    <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-slate-100">
+                      <Zoomable
+                        src={url}
+                        alt={viewing.titre}
+                        downloadable
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   ))}
                 </div>
               )}

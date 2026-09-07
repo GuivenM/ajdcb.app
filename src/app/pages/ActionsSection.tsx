@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { ArrowLeft, Calendar, Loader2, MapPin } from 'lucide-react';
 import { api, ApiError } from '../../lib/api';
 import { Action, SectionAction } from '../admin/types';
+import { Zoomable } from '../components/Zoomable';
 
 const PILLAR_TITLES: Record<SectionAction, string> = {
   solidarite: 'Solidarité & Intégration',
@@ -71,7 +72,7 @@ export function ActionsSection() {
               className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100"
             >
               <div className="aspect-video bg-slate-200">
-                <img
+                <Zoomable
                   src={action.image_url || FALLBACK_IMAGE}
                   alt={action.titre}
                   className="w-full h-full object-cover"

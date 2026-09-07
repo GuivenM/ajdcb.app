@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Loader2, Plus, Pencil, Trash2, ExternalLink, Eye, Mail, Phone, MapPin, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
 import { useAuth } from '../../context/AuthContext';
+import { cn } from '../../components/Navbar';
+import { useLightbox } from '../../components/ImageLightbox';
 import type { Partenaire, StatutPartenaire, TypePartenaire, NiveauPartenariat } from '../types';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -87,6 +89,7 @@ function emptyForm(): FormState {
 
 export function AdminPartenaires() {
   const { hasRole } = useAuth();
+  const { openImage } = useLightbox();
   const canWrite = hasRole('super_admin', 'admin');
   const canDelete = hasRole('super_admin');
 
@@ -374,7 +377,10 @@ export function AdminPartenaires() {
             <>
               <DialogHeader>
                 <div className="flex flex-col items-center text-center gap-3 pt-2">
-                  <Avatar className="w-20 h-20 rounded-xl">
+                  <Avatar
+                    className={cn('w-20 h-20 rounded-xl', viewing.logo_url && 'cursor-zoom-in')}
+                    onClick={() => viewing.logo_url && openImage(viewing.logo_url, viewing.nom, true)}
+                  >
                     {viewing.logo_url && <AvatarImage src={viewing.logo_url} alt={viewing.nom} />}
                     <AvatarFallback className="text-xl rounded-xl bg-brand-green-50 text-brand-green-700">
                       {viewing.nom.slice(0, 2).toUpperCase()}

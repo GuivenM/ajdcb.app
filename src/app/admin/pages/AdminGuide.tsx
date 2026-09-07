@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { api, ApiError } from '../../../lib/api';
 import { useAuth } from '../../context/AuthContext';
+import { Zoomable } from '../../components/Zoomable';
 import type { GuideSection, GuideSousSection, GuideDocument, StatutGuide } from '../types';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -479,9 +480,10 @@ export function AdminGuide() {
           {viewingSection && (
             <>
               {viewingSection.image_url && (
-                <img
+                <Zoomable
                   src={viewingSection.image_url}
                   alt={viewingSection.titre}
+                  downloadable
                   className="w-full h-40 object-cover rounded-xl -mt-2"
                 />
               )}
@@ -526,9 +528,10 @@ export function AdminGuide() {
           {viewingSous && (
             <>
               {viewingSous.image_url && (
-                <img
+                <Zoomable
                   src={viewingSous.image_url}
                   alt={viewingSous.titre}
+                  downloadable
                   className="w-full h-40 object-cover rounded-xl -mt-2"
                 />
               )}

@@ -14,6 +14,7 @@ import { Contact } from './pages/Contact';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './context/AuthContext';
 import { MemberAuthProvider } from './context/MemberAuthContext';
+import { ImageLightboxProvider } from './components/ImageLightbox';
 import { AdminLogin } from './admin/AdminLogin';
 import { AdminLayout } from './admin/AdminLayout';
 import { ProtectedRoute } from './admin/ProtectedRoute';
@@ -52,6 +53,7 @@ export default function App() {
       <ScrollToTop />
       <AuthProvider>
       <MemberAuthProvider>
+      <ImageLightboxProvider>
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
@@ -95,6 +97,7 @@ export default function App() {
             </Route>
           </Route>
         </Routes>
+      </ImageLightboxProvider>
       </MemberAuthProvider>
       </AuthProvider>
       <Toaster position="top-right" richColors />

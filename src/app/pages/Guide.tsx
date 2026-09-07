@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { api, ApiError } from '../../lib/api';
 import type { GuideSection, GuideSousSection, GuideDocument } from '../admin/types';
+import { Zoomable } from '../components/Zoomable';
 
 function DocumentRow({ doc }: { doc: GuideDocument }) {
   const [downloading, setDownloading] = useState(false);
@@ -67,7 +68,7 @@ function SousSectionBlock({ sous }: { sous: GuideSousSection }) {
     <div className="pt-8 first:pt-0">
       <h3 className="text-lg font-bold text-slate-900 mb-3">{sous.titre}</h3>
       {sous.image_url && (
-        <img
+        <Zoomable
           src={sous.image_url}
           alt={sous.titre}
           className="w-full max-h-72 object-cover rounded-2xl mb-4"
@@ -234,7 +235,7 @@ export function Guide() {
                   className="bg-white rounded-3xl border border-slate-100 p-6 md:p-10"
                 >
                   {active.image_url && (
-                    <img
+                    <Zoomable
                       src={active.image_url}
                       alt={active.titre}
                       className="w-full max-h-80 object-cover rounded-2xl mb-6"
