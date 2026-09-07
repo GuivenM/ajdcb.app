@@ -30,6 +30,7 @@ import { AdminGuide } from './admin/pages/AdminGuide';
 import { AdminPartenaires } from './admin/pages/AdminPartenaires';
 import { AdminActions } from './admin/pages/AdminActions';
 import { AdminUtilisateurs } from './admin/pages/AdminUtilisateurs';
+import { AdminJournal } from './admin/pages/AdminJournal';
 import { MemberLogin } from './member/MemberLogin';
 import { MotDePasseOublieMembre } from './member/MotDePasseOublieMembre';
 import { ActivationCompte } from './member/ActivationCompte';
@@ -90,6 +91,7 @@ export default function App() {
               <Route path="actions" element={<AdminActions />} />
               <Route element={<ProtectedRoute roles={['super_admin']} />}>
                 <Route path="utilisateurs" element={<AdminUtilisateurs />} />
+                <Route path="journal" element={<AdminJournal />} />
               </Route>
             </Route>
           </Route>
