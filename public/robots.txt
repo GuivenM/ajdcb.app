@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /member
+
+Sitemap: https://ajdcb.org/sitemap.xml
