@@ -96,11 +96,22 @@ export function Footer() {
           <div className="lg:col-span-2">
             <h3 className="text-white font-bold mb-6">Légal</h3>
             <ul className="space-y-4">
-              {['Mentions légales', 'Politique de confidentialité', 'Statuts (PDF)', 'Règlement (PDF)'].map((item, i) => (
+              {[
+                { label: 'Mentions légales', to: '/mentions-legales' },
+                { label: 'Politique de confidentialité', to: '/confidentialite' },
+                { label: 'Statuts (PDF)', to: '/documents/Statuts_AJDCB.pdf', external: true },
+                { label: 'Règlement (PDF)', to: '/documents/Reglement_Interieur_AJDCB.pdf', external: true },
+              ].map(({ label, to, external }, i) => (
                 <li key={i}>
-                  <Link to="#" className="hover:text-brand-green-500 transition-colors">
-                    {item}
-                  </Link>
+                  {external ? (
+                    <a href={to} target="_blank" rel="noopener noreferrer" className="hover:text-brand-green-500 transition-colors">
+                      {label}
+                    </a>
+                  ) : (
+                    <Link to={to} className="hover:text-brand-green-500 transition-colors">
+                      {label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

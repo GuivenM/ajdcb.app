@@ -11,6 +11,8 @@ import { News } from './pages/News';
 import { NewsDetail } from './pages/NewsDetail';
 import { Join } from './pages/Join';
 import { Contact } from './pages/Contact';
+import { MentionsLegales } from './pages/MentionsLegales';
+import { PolitiqueConfidentialite } from './pages/PolitiqueConfidentialite';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './context/AuthContext';
 import { MemberAuthProvider } from './context/MemberAuthContext';
@@ -71,6 +73,8 @@ export default function App() {
             <Route path="news/:id" element={<NewsDetail />} />
             <Route path="join" element={<Join />} />
             <Route path="contact" element={<Contact />} />
+            <Route path="mentions-legales" element={<MentionsLegales />} />
+            <Route path="confidentialite" element={<PolitiqueConfidentialite />} />
           </Route>
 
           <Route path="/admin/login" element={<AdminLogin />} />
