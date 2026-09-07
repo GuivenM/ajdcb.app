@@ -3,6 +3,8 @@ import { Loader2, Plus, Pencil, Trash2, UserX, UserCheck, Eye, MessageCircle, Fa
 import { api, ApiError, downloadFile } from '../../../lib/api';
 import { compressImage } from '../../../lib/compressImage';
 import { useAuth } from '../../context/AuthContext';
+import { cn } from '../../components/Navbar';
+import { useLightbox } from '../../components/ImageLightbox';
 import type { Membre, StatutMembre } from '../types';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -69,6 +71,7 @@ const EMPTY_FORM: FormState = {
 
 export function AdminMembres() {
   const { hasRole } = useAuth();
+  const { openImage } = useLightbox();
   const canWrite = hasRole('super_admin', 'admin');
   const canDelete = hasRole('super_admin');
   const canCreerAcces = hasRole('super_admin');
@@ -438,7 +441,10 @@ export function AdminMembres() {
             <>
               <DialogHeader>
                 <div className="flex flex-col items-center text-center gap-3 pt-2">
-                  <Avatar className="w-24 h-24">
+                  <Avatar
+                    className={cn('w-24 h-24', viewing.photo_url && 'cursor-zoom-in')}
+                    onClick={() => viewing.photo_url && openImage(viewing.photo_url, viewing.nom_complet, true)}
+                  >
                     {viewing.photo_url && <AvatarImage src={viewing.photo_url} alt={viewing.nom_complet} />}
                     <AvatarFallback className="text-2xl bg-brand-green-50 text-brand-green-700">
                       {viewing.prenom[0]}

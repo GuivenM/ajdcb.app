@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { Calendar, ArrowUpRight, Loader2 } from 'lucide-react';
 import { api, ApiError } from '../../lib/api';
+import { Zoomable } from '../components/Zoomable';
 
 interface Actualite {
   id: number;
@@ -89,7 +90,7 @@ export function News() {
               className={`group relative rounded-3xl overflow-hidden cursor-pointer block h-full bg-white`}
             >
               {item.image_url ? (
-                <img
+                <Zoomable
                   src={item.image_url}
                   alt={item.titre}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"

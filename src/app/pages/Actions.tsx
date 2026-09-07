@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { Users, GraduationCap, Palette, Handshake, Loader2, ArrowRight } from 'lucide-react';
 import { api, ApiError } from '../../lib/api';
 import { Action, SectionAction } from '../admin/types';
+import { Zoomable } from '../components/Zoomable';
 
 // Les 4 piliers sont fixes (mêmes valeurs que la Commission choisie en admin)
 // et gardent toujours leur propre nom/texte de présentation — les actions
@@ -118,9 +119,9 @@ export function Actions() {
                 <div className={`absolute inset-0 border-2 border-${pillar.color}-500/20 rounded-[2rem] transform translate-x-4 translate-y-4 group-hover:translate-x-2 group-hover:translate-y-2 transition-transform duration-500`}></div>
                 
                 <div className="relative rounded-[2rem] overflow-hidden shadow-2xl aspect-[4/3]">
-                  <img 
-                    src={derniere?.image_url || FALLBACK_IMAGE} 
-                    alt={pillar.title} 
+                  <Zoomable
+                    src={derniere?.image_url || FALLBACK_IMAGE}
+                    alt={pillar.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                 </div>

@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Loader2 } from 'lucide-react';
 import { api, ApiError } from '../../lib/api';
 import { Membre } from '../admin/types';
+import { Zoomable } from '../components/Zoomable';
 
 export function About() {
   const [bureau, setBureau] = useState<Membre[]>([]);
@@ -70,7 +71,7 @@ export function About() {
             <div className="text-center">
               <div className="w-16 h-16 bg-slate-200 rounded-full mx-auto mb-4 overflow-hidden">
                 {president.photo_url ? (
-                  <img src={president.photo_url} alt={president.nom_complet} className="w-full h-full object-cover" />
+                  <Zoomable src={president.photo_url} alt={president.nom_complet} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-slate-500 font-bold">
                     {president.prenom[0]}{president.nom[0]}
@@ -108,7 +109,7 @@ export function About() {
               >
                 <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xl">
                   {member.photo_url ? (
-                    <img src={member.photo_url} alt={member.nom_complet} className="w-full h-full object-cover" />
+                    <Zoomable src={member.photo_url} alt={member.nom_complet} className="w-full h-full object-cover" />
                   ) : (
                     <span>{member.prenom[0]}{member.nom[0]}</span>
                   )}

@@ -3,6 +3,7 @@ import { Loader2, Plus, Pencil, Trash2, MapPin, Users, Eye, Calendar, Clock, Tic
 import { api, ApiError } from '../../../lib/api';
 import { compressImage } from '../../../lib/compressImage';
 import { useAuth } from '../../context/AuthContext';
+import { Zoomable } from '../../components/Zoomable';
 import type { Evenement, StatutEvenement } from '../types';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -335,9 +336,10 @@ export function AdminEvenements() {
           {viewing && (
             <>
               {viewing.image_url && (
-                <img
+                <Zoomable
                   src={viewing.image_url}
                   alt={viewing.titre}
+                  downloadable
                   className="w-full h-44 object-cover rounded-xl -mt-2"
                 />
               )}
