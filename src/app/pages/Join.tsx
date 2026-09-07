@@ -9,6 +9,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Checkbox } from '../components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
 import { Progress } from '../components/ui/progress';
+import { VilleSelect } from '../components/VilleSelect';
 import {
   Select,
   SelectContent,
@@ -418,7 +419,7 @@ function MembreForm({ onBack }: { onBack: () => void }) {
                 <Input value={form.adresse} onChange={(e) => set('adresse', e.target.value)} />
               </Field>
               <Field label="Ville">
-                <Input value={form.ville} onChange={(e) => set('ville', e.target.value)} placeholder="Cotonou" />
+                <VilleSelect value={form.ville || null} onChange={(v) => set('ville', v || '')} />
               </Field>
               <Field label="Situation matrimoniale">
                 <Select value={form.situationMatrimoniale} onValueChange={(v) => set('situationMatrimoniale', v)}>

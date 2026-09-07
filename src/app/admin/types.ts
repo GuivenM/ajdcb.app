@@ -87,6 +87,7 @@ export interface CotisationMembre {
   membre_id: number;
   nom_complet: string;
   photo_url: string | null;
+  ville: string | null;
   mois: string;
   cotisation_id: number | null;
   montant: number | null;
@@ -285,6 +286,7 @@ export interface Membre {
   linkedin: string | null;
   twitter: string | null;
   whatsapp: string | null;
+  ville: string | null;
   poste: string | null;
   commission: string | null;
   role: string;

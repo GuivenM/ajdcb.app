@@ -24,6 +24,7 @@ import type {
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui/avatar';
+import { VilleSelect } from '../../components/VilleSelect';
 import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import {
   Table,
@@ -90,7 +91,8 @@ export function AdminCotisations() {
   const [stats, setStats] = useState<CotisationStats | null>(null);
   const [filter, setFilter] = useState<FilterTab>('tous');
   const [search, setSearch] = useState('');
-  const [sortKey, setSortKey] = useState<'nom' | 'statut'>('nom');
+  const [villeFilter, setVilleFilter] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState<'nom' | 'statut' | 'ville'>('nom');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [exporting, setExporting] = useState(false);
 
@@ -126,7 +128,7 @@ export function AdminCotisations() {
     load(mois);
   }, [mois]);
 
-  function toggleSort(key: 'nom' | 'statut') {
+  function toggleSort(key: 'nom' | 'statut' | 'ville') {
     if (sortKey === key) {
       setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
     } else {
@@ -144,6 +146,10 @@ export function AdminCotisations() {
         ? lignes.filter((l) => l.statut === 'payee')
         : lignes.filter((l) => l.statut === 'impayee');
 
+    if (villeFilter) {
+      list = list.filter((l) => l.ville === villeFilter);
+    }
+
     const q = search.trim().toLowerCase();
     if (q) {
       list = list.filter((l) => l.nom_complet.toLowerCase().includes(q));
@@ -153,12 +159,14 @@ export function AdminCotisations() {
       const cmp =
         sortKey === 'nom'
           ? a.nom_complet.localeCompare(b.nom_complet)
+          : sortKey === 'ville'
+          ? (a.ville || '').localeCompare(b.ville || '')
           : a.statut.localeCompare(b.statut);
       return sortDir === 'asc' ? cmp : -cmp;
     });
 
     return sorted;
-  }, [lignes, filter, search, sortKey, sortDir]);
+  }, [lignes, filter, villeFilter, search, sortKey, sortDir]);
 
   async function exportCsv() {
     setExporting(true);
@@ -326,6 +334,9 @@ export function AdminCotisations() {
               className="pl-9"
             />
           </div>
+          <div className="w-48">
+            <VilleSelect value={villeFilter} onChange={setVilleFilter} allowClear clearLabel="Toutes les villes" />
+          </div>
           <Button variant="outline" onClick={exportCsv} disabled={exporting}>
             {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             Exporter
@@ -355,6 +366,9 @@ export function AdminCotisations() {
                 <TableHead>
                   <SortableHeader label="Membre" active={sortKey === 'nom'} dir={sortDir} onClick={() => toggleSort('nom')} />
                 </TableHead>
+                <TableHead className="hidden lg:table-cell">
+                  <SortableHeader label="Ville" active={sortKey === 'ville'} dir={sortDir} onClick={() => toggleSort('ville')} />
+                </TableHead>
                 <TableHead className="hidden md:table-cell">Paiement</TableHead>
                 <TableHead>
                   <SortableHeader label="Statut" active={sortKey === 'statut'} dir={sortDir} onClick={() => toggleSort('statut')} />
@@ -379,6 +393,7 @@ export function AdminCotisations() {
                       <span className="font-medium text-slate-900">{l.nom_complet}</span>
                     </button>
                   </TableCell>
+                  <TableCell className="hidden lg:table-cell text-slate-600 text-sm">{l.ville || '—'}</TableCell>
                   <TableCell className="hidden md:table-cell text-slate-600 text-sm">
                     {l.statut === 'payee'
                       ? `${l.date_paiement ? new Date(l.date_paiement).toLocaleDateString('fr-FR') : ''} · ${l.mode_paiement ? MODE_LABELS[l.mode_paiement] : ''}`
