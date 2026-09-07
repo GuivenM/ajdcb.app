@@ -7,6 +7,7 @@ import type { Membre, StatutMembre } from '../types';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui/avatar';
+import { VilleSelect } from '../../components/VilleSelect';
 import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import {
   Table,
@@ -44,6 +45,7 @@ interface FormState {
   poste: string;
   commission: string;
   whatsapp: string;
+  ville: string;
   facebook: string;
   instagram: string;
   linkedin: string;
@@ -57,6 +59,7 @@ const EMPTY_FORM: FormState = {
   poste: NONE,
   commission: NONE,
   whatsapp: '',
+  ville: '',
   facebook: '',
   instagram: '',
   linkedin: '',
@@ -97,7 +100,8 @@ export function AdminMembres() {
   }
 
   const [search, setSearch] = useState('');
-  const [sortKey, setSortKey] = useState<'nom' | 'role' | 'statut'>('nom');
+  const [villeFilter, setVilleFilter] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState<'nom' | 'role' | 'statut' | 'ville'>('nom');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [exporting, setExporting] = useState(false);
 
@@ -116,7 +120,7 @@ export function AdminMembres() {
     load();
   }, []);
 
-  function toggleSort(key: 'nom' | 'role' | 'statut') {
+  function toggleSort(key: 'nom' | 'role' | 'statut' | 'ville') {
     if (sortKey === key) {
       setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
     } else {
@@ -128,6 +132,10 @@ export function AdminMembres() {
   const filtered = useMemo(() => {
     if (!membres) return [];
     let list = filter === 'tous' ? membres : membres.filter((m) => m.statut === filter);
+
+    if (villeFilter) {
+      list = list.filter((m) => m.ville === villeFilter);
+    }
 
     const q = search.trim().toLowerCase();
     if (q) {
@@ -144,12 +152,13 @@ export function AdminMembres() {
       let cmp = 0;
       if (sortKey === 'nom') cmp = a.nom_complet.localeCompare(b.nom_complet);
       else if (sortKey === 'role') cmp = a.role.localeCompare(b.role);
+      else if (sortKey === 'ville') cmp = (a.ville || '').localeCompare(b.ville || '');
       else cmp = a.statut.localeCompare(b.statut);
       return sortDir === 'asc' ? cmp : -cmp;
     });
 
     return sorted;
-  }, [membres, filter, search, sortKey, sortDir]);
+  }, [membres, filter, villeFilter, search, sortKey, sortDir]);
 
   function openCreate() {
     setForm(EMPTY_FORM);
@@ -163,6 +172,7 @@ export function AdminMembres() {
       poste: m.poste || NONE,
       commission: m.commission || NONE,
       whatsapp: m.whatsapp || '',
+      ville: m.ville || '',
       facebook: m.facebook || '',
       instagram: m.instagram || '',
       linkedin: m.linkedin || '',
@@ -179,6 +189,7 @@ export function AdminMembres() {
     if (form.poste !== NONE) fd.append('poste', form.poste);
     if (form.commission !== NONE) fd.append('commission', form.commission);
     if (form.whatsapp) fd.append('whatsapp', form.whatsapp);
+    if (form.ville) fd.append('ville', form.ville);
     if (form.facebook) fd.append('facebook', form.facebook);
     if (form.instagram) fd.append('instagram', form.instagram);
     if (form.linkedin) fd.append('linkedin', form.linkedin);
@@ -286,6 +297,9 @@ export function AdminMembres() {
               className="pl-9"
             />
           </div>
+          <div className="w-48">
+            <VilleSelect value={villeFilter} onChange={setVilleFilter} allowClear clearLabel="Toutes les villes" />
+          </div>
           <Button variant="outline" onClick={exportCsv} disabled={exporting}>
             {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             Exporter
@@ -312,6 +326,9 @@ export function AdminMembres() {
                 <TableHead className="hidden md:table-cell">
                   <SortableHeader label="Rôle" active={sortKey === 'role'} dir={sortDir} onClick={() => toggleSort('role')} />
                 </TableHead>
+                <TableHead className="hidden lg:table-cell">
+                  <SortableHeader label="Ville" active={sortKey === 'ville'} dir={sortDir} onClick={() => toggleSort('ville')} />
+                </TableHead>
                 <TableHead>
                   <SortableHeader label="Statut" active={sortKey === 'statut'} dir={sortDir} onClick={() => toggleSort('statut')} />
                 </TableHead>
@@ -334,6 +351,7 @@ export function AdminMembres() {
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-slate-600">{m.role}</TableCell>
+                  <TableCell className="hidden lg:table-cell text-slate-600">{m.ville || '—'}</TableCell>
                   <TableCell>
                     <Badge
                       variant="outline"
@@ -624,6 +642,14 @@ export function AdminMembres() {
                 value={form.whatsapp}
                 onChange={(e) => setForm((f) => ({ ...f, whatsapp: e.target.value }))}
                 placeholder="+229 00 00 00 00"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Ville</Label>
+              <VilleSelect
+                value={form.ville || null}
+                onChange={(ville) => setForm((f) => ({ ...f, ville: ville || '' }))}
               />
             </div>
 
