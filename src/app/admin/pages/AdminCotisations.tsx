@@ -275,11 +275,52 @@ export function AdminCotisations() {
     rafraichirHistorique(l.membre_id, l.nom_complet);
   }
 
-  function moisImpayePlusAncien(): CotisationHistoriqueEntry | null {
-    if (!historique) return null;
+  function moisImpayePlusAncien(): CotisationHistoriqueEntry | null {    if (!historique) return null;
     const impayes = historique.entries.filter((e) => e.statut === 'impayee');
     if (impayes.length === 0) return null;
     return impayes.reduce((plusAncien, e) => (e.mois < plusAncien.mois ? e : plusAncien));
+  }
+
+  /**
+   * Même contrôle que ouvrirPaiementDepuisHistorique, mais pour le bouton
+   * "Marquer payé" du tableau principal (mois affiché en haut de la page) —
+   * là on n'a pas l'historique du membre déjà chargé, donc on va le
+   * chercher avant d'autoriser le paiement.
+   */
+  async function ouvrirPaiementDepuisTableau(l: CotisationMembre) {
+    try {
+      const data = await api.get<{ historique: CotisationHistoriqueEntry[] }>(
+        `/v1/cotisations/membre/${l.membre_id}`
+      );
+      const impayesAnterieurs = data.historique.filter((e) => e.statut === 'impayee' && e.mois < l.mois);
+
+      if (impayesAnterieurs.length > 0) {
+        const plusAncien = impayesAnterieurs.reduce((a, b) => (b.mois < a.mois ? b : a));
+        toast.info(
+          `${moisLabel(l.mois)} ne peut pas être réglé avant ${moisLabel(plusAncien.mois)}, qui est le mois impayé le plus ancien. On règle celui-là d'abord.`
+        );
+        openPaiement(
+          {
+            membre_id: l.membre_id,
+            nom_complet: l.nom_complet,
+            photo_url: l.photo_url,
+            ville: l.ville,
+            mois: plusAncien.mois,
+            cotisation_id: null,
+            montant: plusAncien.montant,
+            statut: plusAncien.statut,
+            date_paiement: plusAncien.date_paiement,
+            mode_paiement: null,
+            commentaire: null,
+          },
+          plusAncien.mois
+        );
+      } else {
+        openPaiement(l);
+      }
+    } catch {
+      toast.error("Impossible de vérifier l'historique de ce membre avant paiement.");
+    }
   }
 
   function ouvrirPaiementDepuisHistorique(entry: CotisationHistoriqueEntry) {
@@ -481,7 +522,7 @@ export function AdminCotisations() {
                           variant="ghost"
                           size="icon"
                           className="text-brand-green-600 hover:text-brand-green-700"
-                          onClick={() => openPaiement(l)}
+                          onClick={() => ouvrirPaiementDepuisTableau(l)}
                           title="Marquer payé"
                         >
                           <Check className="w-4 h-4" />
