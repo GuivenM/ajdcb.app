@@ -104,10 +104,12 @@ export function AdminCotisations() {
   const [saving, setSaving] = useState(false);
 
   const [historique, setHistorique] = useState<{
+    membre_id: number;
     nom: string;
     entries: CotisationHistoriqueEntry[];
     alerte: boolean;
   } | null>(null);
+  const [paiementMois, setPaiementMois] = useState<string | null>(null);
 
   async function load(m: string) {
     setLignes(null);
@@ -200,21 +202,22 @@ export function AdminCotisations() {
     }
   }
 
-  function openPaiement(l: CotisationMembre) {
+  function openPaiement(l: CotisationMembre, moisCible?: string) {
     setPaiementTarget(l);
+    setPaiementMois(moisCible || mois);
     setDatePaiement(l.date_paiement || new Date().toISOString().slice(0, 10));
     setModePaiement(l.mode_paiement || 'especes');
-    setMontant(String(l.montant));
+    setMontant(String(l.montant ?? 1000));
     setCommentaire(l.commentaire || '');
   }
 
   async function confirmerPaiement() {
-    if (!paiementTarget) return;
+    if (!paiementTarget || !paiementMois) return;
     setSaving(true);
     try {
       await api.post('/v1/cotisations/marquer', {
         membre_id: paiementTarget.membre_id,
-        mois,
+        mois: paiementMois,
         statut: 'payee',
         montant: Number(montant) || 1000,
         date_paiement: datePaiement,
@@ -223,7 +226,10 @@ export function AdminCotisations() {
       });
       toast.success('Cotisation marquée payée.');
       setPaiementTarget(null);
-      load(mois);
+      if (paiementMois === mois) load(mois);
+      if (historique && historique.membre_id === paiementTarget.membre_id) {
+        rafraichirHistorique(historique.membre_id, historique.nom);
+      }
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Une erreur est survenue.');
     } finally {
@@ -231,34 +237,62 @@ export function AdminCotisations() {
     }
   }
 
-  async function marquerImpayee(l: CotisationMembre) {
+  async function marquerImpayee(l: CotisationMembre, moisCible?: string) {
     try {
       await api.post('/v1/cotisations/marquer', {
         membre_id: l.membre_id,
-        mois,
+        mois: moisCible || mois,
         statut: 'impayee',
       });
       toast.success('Cotisation marquée impayée.');
-      load(mois);
+      if (!moisCible || moisCible === mois) load(mois);
+      if (historique && historique.membre_id === l.membre_id) {
+        rafraichirHistorique(historique.membre_id, historique.nom);
+      }
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Action impossible.');
     }
   }
 
-  async function voirHistorique(l: CotisationMembre) {
+  async function rafraichirHistorique(membreId: number, nom: string) {
     try {
       const data = await api.get<{
         historique: CotisationHistoriqueEntry[];
         alerte_radiation: boolean;
-      }>(`/v1/cotisations/membre/${l.membre_id}`);
+      }>(`/v1/cotisations/membre/${membreId}`);
       setHistorique({
-        nom: l.nom_complet,
+        membre_id: membreId,
+        nom,
         entries: data.historique,
         alerte: data.alerte_radiation,
       });
     } catch {
       toast.error("Impossible de charger l'historique.");
     }
+  }
+
+  async function voirHistorique(l: CotisationMembre) {
+    rafraichirHistorique(l.membre_id, l.nom_complet);
+  }
+
+  function ouvrirPaiementDepuisHistorique(entry: CotisationHistoriqueEntry) {
+    if (!historique) return;
+    openPaiement(
+      {
+        membre_id: historique.membre_id,
+        nom_complet: historique.nom,
+        photo_url: null,
+        ville: null,
+        mois: entry.mois,
+        cotisation_id: null,
+        montant: entry.montant,
+        statut: entry.statut,
+        date_paiement: entry.date_paiement,
+        mode_paiement: null,
+        commentaire: null,
+      },
+      entry.mois
+    );
   }
 
   return (
@@ -459,7 +493,10 @@ export function AdminCotisations() {
           {paiementTarget && (
             <>
               <DialogHeader>
-                <DialogTitle>Marquer payé — {paiementTarget.nom_complet}</DialogTitle>
+                <DialogTitle>
+                  Marquer payé — {paiementTarget.nom_complet}
+                  {paiementMois && <span className="text-slate-400 font-normal"> · {moisLabel(paiementMois)}</span>}
+                </DialogTitle>
               </DialogHeader>
 
               <div className="space-y-3">
@@ -546,32 +583,58 @@ export function AdminCotisations() {
               )}
 
               <div className="grid grid-cols-3 gap-2">
-                {historique.entries.map((e) => (
-                  <div
-                    key={e.mois}
-                    className={`rounded-lg border px-3 py-2 text-center ${
-                      e.statut === 'payee'
-                        ? 'bg-brand-green-50 border-brand-green-200'
-                        : e.statut === 'anterieure_adhesion'
-                        ? 'bg-slate-50 border-slate-200'
-                        : 'bg-brand-red-50 border-brand-red-200'
-                    }`}
-                  >
-                    <p className="text-[11px] text-slate-500 capitalize">{moisLabel(e.mois).split(' ')[0]}</p>
-                    <p
-                      className={`text-xs font-semibold mt-0.5 ${
+                {historique.entries.map((e) => {
+                  const cliquable = e.statut !== 'anterieure_adhesion';
+                  return (
+                    <button
+                      key={e.mois}
+                      type="button"
+                      disabled={!cliquable}
+                      title={
+                        e.statut === 'impayee'
+                          ? 'Marquer ce mois payé'
+                          : e.statut === 'payee'
+                          ? 'Annuler ce paiement (repasser impayé)'
+                          : undefined
+                      }
+                      onClick={() => {
+                        if (e.statut === 'impayee') ouvrirPaiementDepuisHistorique(e);
+                        else if (e.statut === 'payee') {
+                          if (confirm(`Repasser ${moisLabel(e.mois)} en impayé ?`)) {
+                            marquerImpayee(
+                              { membre_id: historique.membre_id, nom_complet: historique.nom } as CotisationMembre,
+                              e.mois
+                            );
+                          }
+                        }
+                      }}
+                      className={`rounded-lg border px-3 py-2 text-center transition-colors ${
                         e.statut === 'payee'
-                          ? 'text-brand-green-600'
+                          ? 'bg-brand-green-50 border-brand-green-200 hover:bg-brand-green-100'
                           : e.statut === 'anterieure_adhesion'
-                          ? 'text-slate-400'
-                          : 'text-brand-red-600'
+                          ? 'bg-slate-50 border-slate-200 cursor-default'
+                          : 'bg-brand-red-50 border-brand-red-200 hover:bg-brand-red-100'
                       }`}
                     >
-                      {e.statut === 'payee' ? 'Payé' : e.statut === 'anterieure_adhesion' ? '—' : 'Impayé'}
-                    </p>
-                  </div>
-                ))}
+                      <p className="text-[11px] text-slate-500 capitalize">{moisLabel(e.mois).split(' ')[0]}</p>
+                      <p
+                        className={`text-xs font-semibold mt-0.5 ${
+                          e.statut === 'payee'
+                            ? 'text-brand-green-600'
+                            : e.statut === 'anterieure_adhesion'
+                            ? 'text-slate-400'
+                            : 'text-brand-red-600'
+                        }`}
+                      >
+                        {e.statut === 'payee' ? 'Payé' : e.statut === 'anterieure_adhesion' ? '—' : 'Impayé'}
+                      </p>
+                    </button>
+                  );
+                })}
               </div>
+              <p className="text-xs text-slate-400 text-center">
+                Cliquez sur un mois impayé pour le marquer payé (paiement reçu par un autre canal).
+              </p>
             </>
           )}
         </DialogContent>
