@@ -275,23 +275,43 @@ export function AdminCotisations() {
     rafraichirHistorique(l.membre_id, l.nom_complet);
   }
 
+  function moisImpayePlusAncien(): CotisationHistoriqueEntry | null {
+    if (!historique) return null;
+    const impayes = historique.entries.filter((e) => e.statut === 'impayee');
+    if (impayes.length === 0) return null;
+    return impayes.reduce((plusAncien, e) => (e.mois < plusAncien.mois ? e : plusAncien));
+  }
+
   function ouvrirPaiementDepuisHistorique(entry: CotisationHistoriqueEntry) {
     if (!historique) return;
+
+    // On ne peut pas régler un mois impayé si un mois antérieur l'est aussi
+    // encore — sinon on casserait le calcul du retard consécutif (Article 3)
+    // en payant un mois récent pendant qu'un plus ancien reste en dette.
+    const plusAncien = moisImpayePlusAncien();
+    let cible = entry;
+    if (plusAncien && plusAncien.mois < entry.mois) {
+      cible = plusAncien;
+      toast.info(
+        `${moisLabel(entry.mois)} ne peut pas être réglé avant ${moisLabel(plusAncien.mois)}, qui est le mois impayé le plus ancien. On règle celui-là d'abord.`
+      );
+    }
+
     openPaiement(
       {
         membre_id: historique.membre_id,
         nom_complet: historique.nom,
         photo_url: null,
         ville: null,
-        mois: entry.mois,
+        mois: cible.mois,
         cotisation_id: null,
-        montant: entry.montant,
-        statut: entry.statut,
-        date_paiement: entry.date_paiement,
+        montant: cible.montant,
+        statut: cible.statut,
+        date_paiement: cible.date_paiement,
         mode_paiement: null,
         commentaire: null,
       },
-      entry.mois
+      cible.mois
     );
   }
 
