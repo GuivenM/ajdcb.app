@@ -419,8 +419,8 @@ export function AdminCotisations() {
           </TabsList>
         </Tabs>
 
-        <div className="flex items-center gap-2">
-          <div className="relative sm:w-64">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
+          <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
               value={search}
@@ -429,19 +429,28 @@ export function AdminCotisations() {
               className="pl-9"
             />
           </div>
-          <div className="w-48">
+          <div className="w-full sm:w-48">
             <VilleSelect value={villeFilter} onChange={setVilleFilter} allowClear clearLabel="Toutes les villes" />
           </div>
-          <Button variant="outline" onClick={exportCsv} disabled={exporting}>
-            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            Exporter
-          </Button>
-          {hasRole('super_admin', 'tresorier') && (
-            <Button variant="outline" onClick={verifierRetards} disabled={verifying} title="Envoyer les rappels et radier automatiquement les membres à 3 mois consécutifs impayés">
-              {verifying ? <Loader2 className="w-4 h-4 animate-spin" /> : <AlertTriangle className="w-4 h-4" />}
-              Vérifier les retards
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={exportCsv} disabled={exporting} className="flex-1 sm:flex-none">
+              {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              Exporter
             </Button>
-          )}
+            {hasRole('super_admin', 'tresorier') && (
+              <Button
+                variant="outline"
+                onClick={verifierRetards}
+                disabled={verifying}
+                title="Envoyer les rappels et radier automatiquement les membres à 3 mois consécutifs impayés"
+                className="flex-1 sm:flex-none"
+              >
+                {verifying ? <Loader2 className="w-4 h-4 animate-spin" /> : <AlertTriangle className="w-4 h-4" />}
+                <span className="sm:hidden">Retards</span>
+                <span className="hidden sm:inline">Vérifier les retards</span>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -561,7 +570,7 @@ export function AdminCotisations() {
               </DialogHeader>
 
               <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label htmlFor="date-paiement">Date</Label>
                     <Input
